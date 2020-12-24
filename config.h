@@ -1,0 +1,25 @@
+#include "main.h"
+
+#define PORT_DRIVELEFTFRONT 19
+#define PORT_DRIVELEFTMIDDLE 9
+#define PORT_DRIVELEFTBACK 1
+#define PORT_DRIVERIGHTFRONT 12
+#define PORT_DRIVERIGHTMIDDLE 13
+#define PORT_DRIVERIGHTBACK 11
+#define PORT_ROLLERS 14
+#define PORT_FLYWHEEL 15
+
+#define PORT_TOPBACK 8
+#define PORT_BOTTOMBACK 7
+
+//these macros go in config
+#define LINE_TRACKER_LEFT 8
+#define LINE_TRACKER_MIDDLE 3
+#define LINE_TRACKER_RIGHT 2
+
+#define LINE_TRACKER_BALL_TOP 4
+#define LINE_TRACKER_BALL_BOTTOM 1
+
+#define IMU_PORT 17
+extern int autonNumber;
+extern bool left;
