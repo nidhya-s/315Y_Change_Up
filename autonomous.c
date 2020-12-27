@@ -31,8 +31,15 @@
 
 #define GYRO_START 0
 
+#define TOPSENSOR 2400
+#define BOTTOMSENSOR 2700
+
 bool run_intake = false;
+int extraTime = 0;
+
 bool run_flywheel = false;
+
+
 
 
 
@@ -42,6 +49,9 @@ int currentheading = 0;
 uint32_t programStartTime = 0;
 int  imu_sensor = 1;
 adi_gyro_t gyro;
+
+extern void middleGoal(bool auton);
+extern void cornerGoal(bool auton);
 #define max(a, b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -529,108 +539,77 @@ void flipout()
   autonFlywheel(0);
 
 }
-void cornerGoal()
+void cornerGoalOneRed()
 {
   int ballsintake = 0;
   int ballsshoot = 0;
-  autonFlywheel(127);
-  autonRollers(127);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > 2850)
-  {
-    if(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) < 2850)
+  bool pressed = false;
+  motor_move(PORT_FLYWHEEL, 127);
+  motor_move(PORT_ROLLERS, -127);
+  int prevbottom = 0;
+  int prevtop = 0;
+  int timetop = 0;
+  int timebot = 0;
+  while(ballsshoot < 1 || ballsintake < 2 || (timetop != 0 && (millis() - timetop) < 300)){
+    int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
+    if(timetop != 0){
+      if((millis() - timetop) > 300){
+        motor_move(PORT_FLYWHEEL, 0);
+      }
+    }
+    if(timebot != 0)
     {
+      if((millis() - timebot) > 300){
+        motor_move(PORT_ROLLERS, -127);
+        timebot = 0;
+      }
+    }
+    else if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR && ballsintake < 2){
       ballsintake++;
-      autonRollers(0);
+      if(ballsintake == 1)
+      {
+        motor_move(PORT_ROLLERS, 0);
+        timebot = millis();
+      }
+      if(ballsintake >= 2){
+        motor_move(PORT_ROLLERS, 0);
+      }
     }
-    if(ballsintake >= 2)
-    {
-      autonRollers(0);
+
+    prevbottom = curbottom;
+    int curtop = adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP);
+    if(curtop > TOPSENSOR && prevtop <= TOPSENSOR){
+      ballsshoot++;
+      if(ballsshoot >= 1){
+        timetop = millis();
+      }
     }
-    delay(20);
+    prevtop = curtop;
+    delay(50);
   }
-  delay(300);
-  ballsshoot = 1;
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > 2850)
-  {
-    delay(20);
-  }
-  ballsshoot = 2;
-  autonRollers(127);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > 2850 && ballsintake < 2)
-  {
-    delay(20);
-  }
-  ballsintake++;
-  delay(200);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > 2850 && ballsintake < 2)
-  {
-    delay(20);
-  }
-  ballsintake++;
-  autonFlywheel(0);
-  autonRollers(0);
-}
-void middleGoal()
-{
-  int ballsintake = 0;
-  int ballsshoot = 0;
-  autonFlywheel(127);
-  autonRollers(127);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > 2850)
-  {
-    if(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) < 2850)
-    {
-      ballsintake++;
-      autonRollers(0);
-    }
-    if(ballsintake >= 1)
-    {
-      autonRollers(0);
-    }
-    delay(20);
-  }
-  ballsshoot++;
-  delay(500);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > 2850)
-  {
-    if(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) < 2850)
-    {
-      ballsintake++;
-      autonRollers(0);
-    }
-    if(ballsintake >= 1)
-    {
-      autonRollers(0);
-    }
-    delay(20);
-  }
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > 2850 && ballsintake < 1)
-  {
-    delay(20);
-  }
-  autonRollers(0);
-  delay(400);
-  autonFlywheel(0);
-  ballsshoot++;
+  motor_move(PORT_FLYWHEEL, 0);
+  motor_move(PORT_ROLLERS, 0);
 }
 void indexBall()
 {
   autonFlywheel(127);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > 2850)
+  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && run_flywheel)
   {
+    autonFlywheel(127);
     delay(20);
   }
-  delay(200);
+  delay(50);
   autonFlywheel(0);
 }
 void intakeBall()
 {
   autonRollers(127);
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > 2850)
+  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > BOTTOMSENSOR && run_intake)
   {
+    autonRollers(127);
     delay(20);
   }
-  delay(200);
+  delay(50);
   autonRollers(0);
 }
 void runIntake()
@@ -657,10 +636,16 @@ void runFlywheel()
     delay(50);
   }
 }
-void progSkills(bool left){
-  flipout();
+void setFlywheel(int timeout, bool wait)
+{
   run_flywheel = true;
-
+}
+void setIntake(int timeout, bool wait)
+{
+  run_intake = true;
+}
+void progSkills(bool left){
+  run_flywheel = true;
   /*First Goal*/
   //pick up first ball
   run_intake = true;
@@ -669,28 +654,31 @@ void progSkills(bool left){
 
   //align with first goal
   if(left){
-    turnLeft(-1250, 110);
+    turnLeft(-1275, 110);
   }
   else{
-    turnRight(-1250, 110);
+    turnRight(-1275, 110);
   }
-  forwardCoast(1400, 85, -1250);
+  forwardCoast(1400, 85, -1275);
 
   //shoot first goal
-  cornerGoal();
-  delay(200);
+  cornerGoal(true);
 
   //back out and spit one ball out of the front
-  backwardCoast(400, 120, -1250);
+  backwardCoast(200, 120, -1275);
   run_flywheel = true;
-  autonRollers(-127);
-  delay(200);
-  backwardCoast(1500, 120, -1250);
-  autonRollers(0);
 
+  //spit out one ball
+  autonRollers(-127);
+  //delay(200);
+  backwardCoast(700, 120, -1275);
+  autonRollers(0);
+  backwardCoast(1000, 120, -1275);
+  delay(200);
+  autonRollers(127);
 
   /*Second Goal*/
-  //turn to pick up second ball
+  //turn to pick up ball
   if(left){
     turnRight(-900, 110);
   }
@@ -700,23 +688,28 @@ void progSkills(bool left){
   run_intake = true;
   forwardCoast(1400, 100, -900);
   delay(300);
+  run_flywheel = false;
   backwardCoast(400, 100, -900);
   brake(20);
 
-  //pick up third ball
+  //pick up other ball
   if(left){
-    turnLeft(775, 110);
+    turnLeft(800, 110);
   }
   else{
-    turnRight(775, 110);
+    turnRight(800, 110);
   }
+
+  //eject ball
   autonFlywheel(-127);
-  forwardCoast(500, 100, 775);
+  forwardCoast(1500, 100, 800);
   autonFlywheel(0);
+
   autonRollers(127);
   run_flywheel = true;
-  forwardCoast(2000, 100, 775);
-  forwardCoast(1200, 80, 775);
+  forwardCoast(1000, 100, 800);
+  run_flywheel = true;
+  forwardCoast(1100, 80, 800);
   run_intake = true;
   brake(-20);
 
@@ -727,11 +720,14 @@ void progSkills(bool left){
   else{
     turnLeft(1800, 110);
   }
-  forwardCoast(1800, 100, 1800);
-  middleGoal();
+  //run_flywheel = true;
+  forwardCoast(1800, 85, 1800);
+  middleGoal(true);
 
+  /*Third Goal*/
   //Spit out blue ball
-  backwardCoast(300, 100, 1800);
+  backwardCoast(450, 100, 1800);
+  brake(20);
   autonRollers(127);
   if(left){
     turnLeft(900, 110);
@@ -740,35 +736,118 @@ void progSkills(bool left){
     turnLeft(900, 110);
   }
   autonFlywheel(-127);
-  //pick up third corner ball
+
+  //pick up corner ball
   forwardCoast(700, 100, 900);
-  forwardCoast(700, 90, 900);
+  forwardCoast(1200, 90, 900);
   autonFlywheel(0);
-  forwardCoast(1400, 80, 900);
-  run_flywheel = true;
+  forwardCoast(900, 80, 900);
+
   brake(-20);
   delay(100);
-  run_intake = true;
+
+  //pick up wall ball
   if(left){
-    turnLeft(700, 110);
+    turnLeft(600, 110);
   }
   else{
-    turnLeft(700, 110);
+    turnLeft(600, 110);
   }
-  forwardCoast(1000, 100, 700);
+  run_flywheel = true;
+
+  forwardCoast(500, 90, 600);
+  run_intake = true;
+  forwardCoast(500, 90, 600);
   delay(200);
-  backwardCoast(800, 100, 900);
+  backwardCoast(1500, 100, 900);
   brake(20);
+
   if(left)
   {
-    turnLeft(1350, 100);
+    turnLeft(1300, 100);
   }
   else
   {
-    turnRight(1350, 100);
+    turnRight(1300, 100);
   }
-  forwardCoast(1200, 100, 1350);
-  cornerGoal();
+  forwardCoast(1200, 100, 1300);
+  cornerGoal(true);
+  delay(100);
+
+  //go to next ball next to middle goal
+  /*Fourth Goal*/
+  backwardCoast(200, 100, 1300);
+  run_flywheel = true;
+  autonRollers(-127);
+  backwardCoast(1000, 100, 1300);
+  brake(20);
+  autonRollers(0);
+  if(left)
+  {
+    turnLeft(-220, 100);
+  }
+  else
+  {
+    turnRight(-220, 100);
+  }
+
+  autonRollers(127);
+  autonFlywheel(-127);
+  forwardCoast(1000, 100, -220);
+
+
+  forwardCoast(1000, 90, -220);
+  forwardCoast(1200, 75, -220);
+  brake(-20);
+  //turn to shoot 4th goal
+  if(left)
+  {
+    turnLeft(900, 100);
+  }
+  else
+  {
+    turnRight(900, 100);
+  }
+  autonFlywheel(0);
+  run_flywheel = true;
+  autonRollers(127);
+  //run_intake = true;
+  forwardCoast(600, 100, 900);
+  run_flywheel = false;
+  forwardCoast(600, 100, 900);
+
+  delay(500);
+  autonRollers(0);
+  middleGoal(true);
+  delay(100);
+
+  /*Fifth Goal*/
+  backwardCoast(1200, 100, 900);
+  brake(10);
+
+  if(left)
+  {
+    turnLeft(0, 100);
+  }
+  else
+  {
+    turnRight(0, 100);
+  }
+  autonRollers(127);
+  run_flywheel = true;
+  forwardCoast(2500, 100, 0);
+
+  if(left)
+  {
+    turnLeft(600, 100);
+  }
+  else
+  {
+    turnRight(600, 100);
+  }
+
+  forwardCoast(1300, 100, 700);
+  cornerGoalOneRed();
 }
 
 void displayInfoAuton(void *param)
