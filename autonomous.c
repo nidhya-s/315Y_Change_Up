@@ -46,7 +46,7 @@
 
 #define TDRIVEPOSTOL 6
 
-#define STARTHEADING 1800
+#define STARTHEADING 0
 
 #define GYRO_START 0
 
@@ -633,6 +633,8 @@ void setRollers(int timeout, bool wait){
 }
 
 void firstHalf(){
+  backwardCoast(200, 120, -1275);
+  setFlywheel(0, true);
   //spit out one ball
   autonRollers(-127);
   //delay(200);
@@ -648,8 +650,9 @@ void firstHalf(){
   else{
     turnLeft(-900, 110);
   }
+
+  forwardCoast(1600, 100, -900);
   setRollers(0, false);
-  forwardCoast(1400, 100, -900);
   delay(300);
   run_flywheel = false;
   //Second Goal
@@ -875,12 +878,11 @@ void progSkills(bool left){
 
   //shoot first goal
   cornerGoal(true, 3000);
-  backwardCoast(200, 120, -1275);
-  setFlywheel(0, true);
 
 
 
-  firstHalf(false);
+
+  firstHalf();
 
   //go to next ball next to middle goal
   //Fourth Goal
@@ -969,7 +971,7 @@ void progSkills(bool left){
 
 
 
-  secondHalf(true);
+  secondHalf();
 
   backwardCoast(200, 100, 3100);
   setFlywheel(0, true);
@@ -989,7 +991,7 @@ void progSkills(bool left){
   run_flywheel = false;
   autonRollers(127);
   autonFlywheel(-127);
-  forwardCoast(2700, 100, 1800);
+  forwardCoast(2750, 100, 1800);
   autonFlywheel(0);
   setFlywheel(0, false);
   //setRollers(0, false);
