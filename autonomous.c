@@ -1,57 +1,87 @@
-// New test
-// FROM GIT HUB Dec 24
 #include "main.h"
+
 #include "config.h"
 
-
 #define RIGHTANGLE 780
+
 #define TURNENCODERPRECISION 6
+
 #define MOVEENCODERPRECISION 7
+
 #define NUMDRIVEMOTORS 6
+
 #define VELOCITYLIMIT 3
+
 #define GYRODRIFTRATE 0.0
 
 #define KP 0.10   //0.12
+
 #define KI 0.0025 //0.003
+
 #define INTEGRALLIMIT 6
 
 #define DRIVEP 0.100
+
 #define DRIVEI 0.0018
+
 #define DRIVED 0.055
+
 #define CORRD 0.25 //0.75
+
 #define TDRIVEP 0.145 //.130
+
 #define TDRIVEI 0.0089
+
 #define TDRIVED 0.07 //0.04
+
 #define DRIVEINTEGRALLIMIT 1000
+
 #define DRIVEMAXVEL 1
+
 #define DRIVEPOSTOL 50
+
 #define TDRIVEINTEGRALLIMIT 1000
+
 #define TDRIVEMAXVEL 5
+
 #define TDRIVEPOSTOL 6
+
+#define STARTHEADING 1800
 
 #define GYRO_START 0
 
 #define TOPSENSOR 2400
+
 #define BOTTOMSENSOR 2700
 
+#define CORNERGOALTIMEOUT 2000
+
+#define MIDDLEGOALTIMEOUT 2000
+
 bool run_intake = false;
-int extraTime = 0;
+
+int intakeTimeout = 0;
 
 bool run_flywheel = false;
 
-
-
-
+int flywheelTimeout = 0;
 
 int currentheading = 0;
 
-
 uint32_t programStartTime = 0;
+
 int  imu_sensor = 1;
+
 adi_gyro_t gyro;
 
-extern void middleGoal(bool auton);
-extern void cornerGoal(bool auton);
+extern void middleGoal(bool auton, int timeout);
+
+extern void middleGoalOneRed(bool auton, int timeout);
+
+extern void cornerGoal(bool auton, int timeout);
+
+extern void cornerGoalOneRed(bool auton);
+
 #define max(a, b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -62,8 +92,7 @@ extern void cornerGoal(bool auton);
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-void clearDriveMotors()
-{
+void clearDriveMotors(){
     motor_tare_position(PORT_DRIVELEFTFRONT);
     motor_tare_position(PORT_DRIVELEFTMIDDLE);
     motor_tare_position(PORT_DRIVELEFTBACK);
@@ -81,8 +110,7 @@ void assignDriveMotorsAuton(int power){
     motor_move(PORT_DRIVERIGHTBACK, power);
 }
 
-void assignDriveMotorsPower(int rightSide, int leftSide)
-{
+void assignDriveMotorsPower(int rightSide, int leftSide){
     motor_move(PORT_DRIVELEFTFRONT, leftSide);
     motor_move(PORT_DRIVELEFTMIDDLE, leftSide);
     motor_move(PORT_DRIVELEFTBACK, leftSide);
@@ -91,27 +119,24 @@ void assignDriveMotorsPower(int rightSide, int leftSide)
     motor_move(PORT_DRIVERIGHTBACK, rightSide);
 }
 
-double averageVelocity()
-{
+double averageVelocity(){
     return (abs(motor_get_actual_velocity(PORT_DRIVELEFTFRONT)) + abs(motor_get_actual_velocity(PORT_DRIVELEFTBACK)) +
         abs(motor_get_actual_velocity(PORT_DRIVERIGHTFRONT)) + abs(motor_get_actual_velocity(PORT_DRIVERIGHTBACK)) +
         abs(motor_get_actual_velocity(PORT_DRIVELEFTMIDDLE)) + abs(motor_get_actual_velocity(PORT_DRIVERIGHTMIDDLE)))/
         NUMDRIVEMOTORS;
 }
 
-void resetGyro()
-{
+void resetGyro(){
     adi_gyro_reset(gyro);
     imu_reset(IMU_PORT);
 }
 
-void getHeading()
-{
+void getHeading(){
   int wrap = 0;
-  int imucur = 0;
+  int imucur = STARTHEADING;
   while(true){
       int previousHeading = imucur;
-      imucur = imu_get_heading(IMU_PORT)*10;
+      imucur = imu_get_heading(IMU_PORT)*10 + STARTHEADING;
       if(previousHeading - imucur > 1000)
       {
         wrap ++;
@@ -127,8 +152,7 @@ void getHeading()
       //return (heading + 1800) % 3600 - 1800;
 }
 
-void assignDriveMotorsDist(int leftSide, int rightSide, int power, bool clear, bool turn)
-{
+void assignDriveMotorsDist(int leftSide, int rightSide, int power, bool clear, bool turn){
     if (clear)
     {
         clearDriveMotors();
@@ -164,8 +188,7 @@ void assignDriveMotorsDist(int leftSide, int rightSide, int power, bool clear, b
     assignDriveMotorsPower(0, 0);
 }
 
-void straightPID(int leftSide, int rightSide, int power, int heading)
-{
+void straightPID(int leftSide, int rightSide, int power, int heading){
     leftSide *= 200.0 / 257.0;
     rightSide *= 200.0 / 257.0;
     power *= 200.0 / 257.0;
@@ -240,8 +263,7 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
         assignDriveMotorsPower(0, 0);
      }
 
-     void turnGyro(int degrees, int power)
-     {
+void turnGyro(int degrees, int power){
         uint32_t cur = millis();
         if (left)
         {
@@ -291,7 +313,7 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
         assignDriveMotorsPower(0, 0);
      }
 
-     void coast(int ticks, int power, int heading, bool corr){
+void coast(int ticks, int power, int heading, bool corr){
         ticks *= 200.0 / 257.0;
         power *= 200.0 / 257.0;
         if (left){
@@ -318,31 +340,31 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
         assignDriveMotorsPower(0, 0);
      }
 
-     void forward(int ticks, int power, int heading){
+void forward(int ticks, int power, int heading){
         straightPID(ticks, ticks, power, heading);
      }
 
-     void backward(int ticks, int power, int heading){
+void backward(int ticks, int power, int heading){
         straightPID(-ticks, -ticks, power, heading);
      }
 
-     void forwardCoast(int ticks, int power, int heading)
-     {
+void forwardCoast(int ticks, int power, int heading){
         coast(ticks, power, heading, true);
      }
 
-     void backwardCoast(int ticks, int power, int heading){
+void backwardCoast(int ticks, int power, int heading){
         coast(ticks, -power, heading, true);
      }
 
-     void turnLeft(int degrees, int power){
+void turnLeft(int degrees, int power){
         turnGyro(degrees, power);
      }
 
-     void turnRight(int degrees, int power){
+void turnRight(int degrees, int power){
         turnGyro(degrees, power);
      }
-     void turnLeftNOT(int power, int time){
+
+void turnLeftNOT(int power, int time){
          motor_move(PORT_DRIVELEFTFRONT, power);
          motor_move(PORT_DRIVELEFTMIDDLE, power);
          motor_move(PORT_DRIVERIGHTFRONT, -power);
@@ -352,7 +374,8 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
          delay(time);
          assignDriveMotorsAuton(0);
      }
-     void turnRightNOT(int power, int time){
+
+void turnRightNOT(int power, int time){
          motor_move(PORT_DRIVELEFTFRONT, -power);
          motor_move(PORT_DRIVELEFTMIDDLE, -power);
          motor_move(PORT_DRIVERIGHTFRONT, power);
@@ -362,16 +385,17 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
          delay(time);
          assignDriveMotorsAuton(0);
      }
-     void turnRD(int ticks, int power, bool clear){
+
+void turnRD(int ticks, int power, bool clear){
           assignDriveMotorsDist(-ticks, ticks, power, clear, true);
      }
-     void turnLD(int ticks, int power, bool clear){
+
+void turnLD(int ticks, int power, bool clear){
           assignDriveMotorsDist(ticks, -ticks, power, clear, true);
      }
 
-     //checks if there is a white line
-     bool isWhiteLine(int threshold)
-     {
+//checks if there is a white line
+bool isWhiteLine(int threshold){
        int left = adi_analog_read_calibrated(LINE_TRACKER_LEFT);
        int middle = adi_analog_read_calibrated(LINE_TRACKER_MIDDLE);
        int right = adi_analog_read_calibrated(LINE_TRACKER_RIGHT);
@@ -383,22 +407,21 @@ void straightPID(int leftSide, int rightSide, int power, int heading)
        return false;
      }
 
-
-
 void autonRollers(int power){
   motor_move(PORT_ROLLERS, -power);
 }
+
 void autonFlywheel(int power){
   motor_move(PORT_FLYWHEEL, power);
 }
-void brake(int power)
-{
+
+void brake(int power){
   assignDriveMotorsAuton(power);
   delay(150);
   assignDriveMotorsAuton(0);
 }
-void earlyAuton3Balls()
-{
+
+void earlyAuton3Balls(){
   autonRollers(127);
   assignDriveMotorsAuton(50);
   while(!isWhiteLine(1200)) {
@@ -481,6 +504,7 @@ void earlyAuton3Balls()
   //delay(200);
   backwardCoast(800, 70, 2250);
 }
+
 void threeBallAuton(bool left){
   autonRollers(127);
   assignDriveMotorsAuton(75);
@@ -532,88 +556,49 @@ void threeBallAuton(bool left){
   forwardCoast(100, 60, -1800);
   autonFlywheel(127);*/
 }
-void flipout()
-{
+
+void flipout(){
   autonFlywheel(127);
   delay(150);
   autonFlywheel(0);
 
 }
-void cornerGoalOneRed()
-{
-  int ballsintake = 0;
-  int ballsshoot = 0;
-  bool pressed = false;
-  motor_move(PORT_FLYWHEEL, 127);
-  motor_move(PORT_ROLLERS, -127);
-  int prevbottom = 0;
-  int prevtop = 0;
-  int timetop = 0;
-  int timebot = 0;
-  while(ballsshoot < 1 || ballsintake < 2 || (timetop != 0 && (millis() - timetop) < 300)){
-    int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
-    if(timetop != 0){
-      if((millis() - timetop) > 300){
-        motor_move(PORT_FLYWHEEL, 0);
-      }
-    }
-    if(timebot != 0)
-    {
-      if((millis() - timebot) > 300){
-        motor_move(PORT_ROLLERS, -127);
-        timebot = 0;
-      }
-    }
-    else if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR && ballsintake < 2){
-      ballsintake++;
-      if(ballsintake == 1)
-      {
-        motor_move(PORT_ROLLERS, 0);
-        timebot = millis();
-      }
-      if(ballsintake >= 2){
-        motor_move(PORT_ROLLERS, 0);
-      }
-    }
 
-    prevbottom = curbottom;
-    int curtop = adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP);
-    if(curtop > TOPSENSOR && prevtop <= TOPSENSOR){
-      ballsshoot++;
-      if(ballsshoot >= 1){
-        timetop = millis();
-      }
-    }
-    prevtop = curtop;
-    delay(50);
-  }
-  motor_move(PORT_FLYWHEEL, 0);
-  motor_move(PORT_ROLLERS, 0);
-}
-void indexBall()
-{
+void indexBall(){
   autonFlywheel(127);
+  int timeout = millis();
   while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && run_flywheel)
   {
+    if(flywheelTimeout != 0 && millis() - timeout >= flywheelTimeout)
+    {
+      break;
+    }
     autonFlywheel(127);
     delay(20);
   }
+  flywheelTimeout = 0;
   delay(50);
   autonFlywheel(0);
 }
-void intakeBall()
-{
+
+void intakeBall(){
   autonRollers(127);
+  int timeout = millis();
   while(adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM) > BOTTOMSENSOR && run_intake)
   {
+    if(intakeTimeout != 0 && millis() - timeout >= intakeTimeout)
+    {
+      break;
+    }
     autonRollers(127);
     delay(20);
   }
+  intakeTimeout = 0;
   delay(50);
   autonRollers(0);
 }
-void runIntake()
-{
+
+void runIntake(){
   while(true)
   {
     if(run_intake)
@@ -624,8 +609,8 @@ void runIntake()
     delay(50);
   }
 }
-void runFlywheel()
-{
+
+void runFlywheel(){
   while(true)
   {
     if(run_flywheel)
@@ -636,38 +621,18 @@ void runFlywheel()
     delay(50);
   }
 }
-void setFlywheel(int timeout, bool wait)
-{
+
+void setFlywheel(int timeout, bool wait){
   run_flywheel = true;
+  flywheelTimeout = timeout;
 }
-void setIntake(int timeout, bool wait)
-{
+
+void setRollers(int timeout, bool wait){
   run_intake = true;
+  intakeTimeout = timeout;
 }
-void progSkills(bool left){
-  run_flywheel = true;
-  /*First Goal*/
-  //pick up first ball
-  run_intake = true;
-  forwardCoast(625, 127, 0);
-  delay(450);
 
-  //align with first goal
-  if(left){
-    turnLeft(-1275, 110);
-  }
-  else{
-    turnRight(-1275, 110);
-  }
-  forwardCoast(1400, 85, -1275);
-
-  //shoot first goal
-  cornerGoal(true);
-
-  //back out and spit one ball out of the front
-  backwardCoast(200, 120, -1275);
-  run_flywheel = true;
-
+void firstHalf(){
   //spit out one ball
   autonRollers(-127);
   //delay(200);
@@ -677,18 +642,18 @@ void progSkills(bool left){
   delay(200);
   autonRollers(127);
 
-  /*Second Goal*/
-  //turn to pick up ball
   if(left){
     turnRight(-900, 110);
   }
   else{
     turnLeft(-900, 110);
   }
-  run_intake = true;
+  setRollers(0, false);
   forwardCoast(1400, 100, -900);
   delay(300);
   run_flywheel = false;
+  //Second Goal
+  //turn to pick up ball
   backwardCoast(400, 100, -900);
   brake(20);
 
@@ -699,18 +664,17 @@ void progSkills(bool left){
   else{
     turnRight(800, 110);
   }
-
   //eject ball
   autonFlywheel(-127);
   forwardCoast(1500, 100, 800);
   autonFlywheel(0);
 
   autonRollers(127);
-  run_flywheel = true;
+  setFlywheel(0, true);
   forwardCoast(1000, 100, 800);
-  run_flywheel = true;
+  setFlywheel(0, true);
   forwardCoast(1100, 80, 800);
-  run_intake = true;
+  setRollers(0, false);
   brake(-20);
 
   //shoot second goal
@@ -722,7 +686,7 @@ void progSkills(bool left){
   }
   //run_flywheel = true;
   forwardCoast(1800, 85, 1800);
-  middleGoal(true);
+  middleGoal(true, 3000);
 
   /*Third Goal*/
   //Spit out blue ball
@@ -735,11 +699,14 @@ void progSkills(bool left){
   else{
     turnLeft(900, 110);
   }
+
+  //ejecting ball
   autonFlywheel(-127);
 
   //pick up corner ball
   forwardCoast(700, 100, 900);
   forwardCoast(1200, 90, 900);
+  //stop ejection
   autonFlywheel(0);
   forwardCoast(900, 80, 900);
 
@@ -753,10 +720,10 @@ void progSkills(bool left){
   else{
     turnLeft(600, 110);
   }
-  run_flywheel = true;
+  setFlywheel(0, true);
 
   forwardCoast(500, 90, 600);
-  run_intake = true;
+  setRollers(0, false);
   forwardCoast(500, 90, 600);
   delay(200);
   backwardCoast(1500, 100, 900);
@@ -771,13 +738,154 @@ void progSkills(bool left){
     turnRight(1300, 100);
   }
   forwardCoast(1200, 100, 1300);
-  cornerGoal(true);
+  cornerGoal(true, 3000);
+  delay(100);
+}
+
+void secondHalf(){
+  int headingChange = 1800;
+
+  //spit out one ball
+
+  //delay(200);
+  backwardCoast(200, 120, -1325 + headingChange);
+  setFlywheel(0, false);
+  autonRollers(-127);
+  backwardCoast(1000, 120, -1325 + headingChange);
+  autonRollers(0);
+  delay(200);
+  autonRollers(127);
+
+
+  if(left){
+    turnRight(-900 + headingChange, 110);
+  }
+  else{
+    turnLeft(-900 + headingChange, 110);
+  }
+  setRollers(0, false);
+
+  forwardCoast(2000, 100, 900);
+  delay(300);
+  run_flywheel = false; //Second Goal
+
+  //turn to pick up ball
+  backwardCoast(400, 100, 900);
+  brake(20);
+  //pick up other ball
+  if(left){
+    turnLeft(750 + headingChange, 110);
+  }else{
+    turnRight(750 + headingChange, 110);
+  }
+  //eject ball
+  autonFlywheel(-127);
+  forwardCoast(1500, 100, 750 + headingChange);
+  autonFlywheel(0);
+
+  autonRollers(127);
+  setFlywheel(0, true);
+  forwardCoast(1000, 100, 750 + headingChange);
+  setFlywheel(0, true);
+  forwardCoast(1100, 80, 750 + headingChange);
+  setRollers(0, false);
+  brake(-20);
+
+  //shoot second goal
+  if(left){
+    turnRight(1800 + headingChange, 110);
+  }
+  else{
+    turnLeft(1800 + headingChange, 110);
+  }
+  //run_flywheel = true;
+  forwardCoast(1800, 85, 1800 + headingChange);
+  middleGoal(true, 3000);
+
+  /*Third Goal*/
+  //Spit out blue ball
+  backwardCoast(450, 100, 1800 + headingChange);
+  brake(20);
+  autonRollers(127);
+  if(left){
+    turnLeft(900 + headingChange, 110);
+  }
+  else{
+    turnLeft(900 + headingChange, 110);
+  }
+
+  //ejecting ball
+  autonFlywheel(-127);
+
+  //pick up corner ball
+  forwardCoast(700, 100, 900 + headingChange);
+  forwardCoast(1200, 90, 900 + headingChange);
+  //stop ejection
+  autonFlywheel(0);
+  forwardCoast(900, 80, 900 + headingChange);
+
+  brake(-20);
   delay(100);
 
+  //pick up wall ball
+  if(left){
+    turnLeft(600 + headingChange, 110);
+  }
+  else{
+    turnLeft(600 + headingChange, 110);
+  }
+  setFlywheel(0, true);
+
+  forwardCoast(500, 90, 600 + headingChange);
+  setRollers(0, false);
+  forwardCoast(500, 90, 600 + headingChange);
+  delay(200);
+  backwardCoast(1500, 100, 900 + headingChange);
+  brake(20);
+
+  if(left)
+  {
+    turnLeft(1300 + headingChange, 100);
+  }
+  else
+  {
+    turnRight(1300 + headingChange, 100);
+  }
+  forwardCoast(1200, 100, 1300 + headingChange);
+  cornerGoal(true, 3000);
+  delay(100);
+}
+
+void progSkills(bool left){
+  setFlywheel(0, true);
+  //First Goal
+  //pick up first ball
+  setRollers(0, true);
+  forwardCoast(625, 127, 0);
+  delay(450);
+
+  //align with first goal
+  if(left){
+    turnLeft(-1275, 110);
+  }
+  else{
+    turnRight(-1275, 110);
+  }
+  forwardCoast(1400, 85, -1275);
+
+  //shoot first goal
+  cornerGoal(true, 3000);
+  backwardCoast(200, 120, -1275);
+  setFlywheel(0, true);
+
+
+
+  firstHalf(false);
+
   //go to next ball next to middle goal
-  /*Fourth Goal*/
+  //Fourth Goal
   backwardCoast(200, 100, 1300);
-  run_flywheel = true;
+  setFlywheel(0, true);
   autonRollers(-127);
   backwardCoast(1000, 100, 1300);
   brake(20);
@@ -792,13 +900,16 @@ void progSkills(bool left){
   }
 
   autonRollers(127);
+  //ejecting
+  run_flywheel = false;
   autonFlywheel(-127);
   forwardCoast(1000, 100, -220);
-
-
   forwardCoast(1000, 90, -220);
   forwardCoast(1200, 75, -220);
   brake(-20);
+  autonFlywheel(0);
+  run_flywheel = true;
+
   //turn to shoot 4th goal
   if(left)
   {
@@ -808,23 +919,24 @@ void progSkills(bool left){
   {
     turnRight(900, 100);
   }
-  autonFlywheel(0);
-  run_flywheel = true;
-  autonRollers(127);
+  setRollers(0, false);
   //run_intake = true;
-  forwardCoast(600, 100, 900);
+  forwardCoast(600, 75, 900);
   run_flywheel = false;
-  forwardCoast(600, 100, 900);
+  forwardCoast(1200, 75, 900);
 
   delay(500);
   autonRollers(0);
-  middleGoal(true);
+  middleGoal(true, 3000);
   delay(100);
 
-  /*Fifth Goal*/
-  backwardCoast(1200, 100, 900);
+  //Fifth Goal
+  backwardCoast(1100, 100, 900);
   brake(10);
 
+  autonRollers(127);
+  //ejecting blue ball
+  autonFlywheel(-127);
   if(left)
   {
     turnLeft(0, 100);
@@ -833,25 +945,116 @@ void progSkills(bool left){
   {
     turnRight(0, 100);
   }
-  autonRollers(127);
-  run_flywheel = true;
-  forwardCoast(2500, 100, 0);
+  forwardCoast(3000, 100, 0);
+  delay(200);
+  setFlywheel(0, false);
+  backwardCoast(800, 90, 0);
+  brake(20);
 
+  //turn towards goal
   if(left)
   {
-    turnLeft(600, 100);
+    turnLeft(475, 100);
   }
   else
   {
-    turnRight(600, 100);
+    turnRight(475, 100);
   }
 
-  forwardCoast(1300, 100, 700);
-  cornerGoalOneRed();
+  forwardCoast(1800, 80, 475);
+  autonRollers(0);
+  delay(500);
+  cornerGoalOneRed(true);
+  delay(100);
+
+
+
+  secondHalf(true);
+
+  backwardCoast(200, 100, 3100);
+  setFlywheel(0, true);
+  autonRollers(-127);
+  backwardCoast(700, 100, 3100);
+  brake(20);
+  autonRollers(0);
+  if(left)
+  {
+    turnLeft(1800, 100);
+  }
+  else
+  {
+    turnRight(1800, 100);
+  }
+
+  run_flywheel = false;
+  autonRollers(127);
+  autonFlywheel(-127);
+  forwardCoast(2700, 100, 1800);
+  autonFlywheel(0);
+  setFlywheel(0, false);
+  //setRollers(0, false);
+  if(left)
+  {
+    turnLeft(2700, 100);
+  }
+  else
+  {
+    turnRight(2700, 100);
+  }
+  forwardCoast(500, 100, 2700);
+
+  delay(200);
+  autonRollers(0);
+  delay(500);
+  run_flywheel = false;
+  middleGoalOneRed(true, 2000);
+
+  backwardCoast(400, 60, 2700);
+  brake(20);
+  autonFlywheel(0);
+  delay(200);
+
+  /*Ninth Ball*/
+  if(left)
+  {
+    turnRight(900, 100);
+  }
+  else
+  {
+    turnLeft(900, 100);
+  }
+  autonRollers(127);
+  autonFlywheel(-127);
+  forwardCoast(800, 100, 900);
+  delay(200);
+  forwardCoast(400, 90, 900);
+  delay(200);
+  autonFlywheel(0);
+  forwardCoast(1000, 90, 750);
+
+  backwardCoast(800, 70, 750);
+  forwardCoast(1000, 90, 750);
+  backwardCoast(500, 70, 750);
+
+  if(left)
+  {
+    turnRight(950, 100);
+  }
+  else
+  {
+    turnLeft(950, 100);
+  }
+  forwardCoast(300, 70, 950);
+  autonFlywheel(127);
+  delay(700);
+  backwardCoast(400, 70, 750);
+  forwardCoast(1300, 90, 750);
+  assignDriveMotorsAuton(-127);
+  delay(600);
+  assignDriveMotorsAuton(0);
 }
 
-void displayInfoAuton(void *param)
-{
+void displayInfoAuton(void *param){
    int i = 10;
    lcd_initialize();
    while (true)
@@ -881,8 +1084,7 @@ void displayInfoAuton(void *param)
    }
 }
 
-void autonomous()
-{
+void autonomous() {
 
    imu_sensor = 1;
    autonNumber = 1;
