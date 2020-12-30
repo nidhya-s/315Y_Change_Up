@@ -13,8 +13,9 @@ extern void initializeDriveMotors();
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-#define TOPSENSOR 2400
+#define TOPSENSOR 2700
 #define BOTTOMSENSOR 2700
+//#define TOPSENSORINDEX 2400
 int shootBalls = 0;
 extern adi_gyro_t gyro;
 
@@ -40,8 +41,16 @@ void drive(void* param){
         delay(20);
     }
 }
-void middleGoal(bool auton, int timeout)
-{
+void preGoal(){
+  int curtime = millis();
+  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && (millis() - curtime) < 500)
+  {
+    motor_move(PORT_FLYWHEEL, 127);
+    delay(20);
+  }
+}
+void middleGoal(bool auton, int timeout){
+  preGoal();
   int timeoutTimer = -1;
   if(timeout!= 0)
   {
@@ -92,8 +101,8 @@ void middleGoal(bool auton, int timeout)
   motor_move(PORT_FLYWHEEL, 0);
   motor_move(PORT_ROLLERS, 0);
 }
-void middleGoalOneRed(bool auton, int timeout)
-{
+void middleGoalOneRed(bool auton, int timeout){
+  preGoal();
   int timeoutTimer = -1;
   if(timeout!= 0)
   {
@@ -140,6 +149,7 @@ void middleGoalOneRed(bool auton, int timeout)
   motor_move(PORT_ROLLERS, 0);
 }
 void cornerGoalOneRed(bool auton){
+  preGoal();
   int ballsintake = 0;
   int ballsshoot = 0;
   bool pressed = false;
@@ -182,8 +192,8 @@ void cornerGoalOneRed(bool auton){
   motor_move(PORT_FLYWHEEL, 0);
   motor_move(PORT_ROLLERS, 0);
 }
-void cornerGoal(bool auton, int timeout)
-{
+void cornerGoal(bool auton, int timeout){
+  preGoal();
   int timeoutTimer = -1;
   if(timeout!= 0)
   {

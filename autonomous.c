@@ -50,7 +50,9 @@
 
 #define GYRO_START 0
 
-#define TOPSENSOR 2400
+#define TOPSENSOR 2600
+
+//#define TOPSENSORINDEX 2400
 
 #define BOTTOMSENSOR 2700
 
@@ -282,8 +284,8 @@ void turnGyro(int degrees, int power){
         bool endSequence = false;
         int startEnd = 0;
         int endTime = 200; //500
-
-        while ((abs(errorChange) > TDRIVEMAXVEL || (!endSequence || (millis() - startEnd < endTime))) && millis() - cur < 1155)
+                                                                                                                        //1155, 955
+        while ((abs(errorChange) > TDRIVEMAXVEL || (!endSequence || (millis() - startEnd < endTime))) && millis() - cur < 800)
         {
            if (abs(error) <= TDRIVEPOSTOL && !endSequence)
            {
@@ -633,9 +635,12 @@ void setRollers(int timeout, bool wait){
 }
 
 void firstHalf(){
-  backwardCoast(200, 120, -1275);
-  setFlywheel(0, true);
   //spit out one ball
+  autonRollers(127);
+  setFlywheel(0, false);
+  backwardCoast(200, 120, -1275);
+  autonRollers(0);
+  delay(50);
   autonRollers(-127);
   //delay(200);
   backwardCoast(700, 120, -1275);
@@ -1046,6 +1051,7 @@ void progSkills(bool left){
   {
     turnLeft(950, 100);
   }
+                      //950
   forwardCoast(300, 70, 950);
   autonFlywheel(127);
   delay(700);
