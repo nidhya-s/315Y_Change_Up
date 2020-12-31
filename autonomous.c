@@ -26,7 +26,7 @@
 
 #define DRIVED 0.055
 
-#define CORRD 0.25 //0.75
+#define CORRD 0.3 //0.75
 
 #define TDRIVEP 0.145 //.130
 
@@ -44,13 +44,13 @@
 
 #define TDRIVEMAXVEL 5
 
-#define TDRIVEPOSTOL 6
+#define TDRIVEPOSTOL 150 //6
 
-#define STARTHEADING 0
+#define STARTHEADING 900
 
 #define GYRO_START 0
 
-#define TOPSENSOR 2600
+#define TOPSENSOR 2400
 
 //#define TOPSENSORINDEX 2400
 
@@ -395,7 +395,6 @@ void turnRD(int ticks, int power, bool clear){
 void turnLD(int ticks, int power, bool clear){
           assignDriveMotorsDist(ticks, -ticks, power, clear, true);
      }
-
 //checks if there is a white line
 bool isWhiteLine(int threshold){
        int left = adi_analog_read_calibrated(LINE_TRACKER_LEFT);
@@ -638,14 +637,15 @@ void firstHalf(){
   //spit out one ball
   autonRollers(127);
   setFlywheel(0, false);
-  backwardCoast(200, 120, -1275);
+  backwardCoast(200, 127, -1275);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
   //delay(200);
-  backwardCoast(700, 120, -1275);
+  backwardCoast(700, 127, -1275);
+
+  backwardCoast(800, 127, -1275);
   autonRollers(0);
-  backwardCoast(1000, 120, -1275);
   delay(200);
   autonRollers(127);
 
@@ -656,34 +656,34 @@ void firstHalf(){
     turnLeft(-900, 110);
   }
 
-  forwardCoast(1600, 100, -900);
+  forwardCoast(1600, 115, -900);
   setRollers(0, false);
   delay(300);
   run_flywheel = false;
   //Second Goal
   //turn to pick up ball
-  backwardCoast(400, 100, -900);
+  backwardCoast(400, 127, -900);
   brake(20);
 
   //pick up other ball
   if(left){
-    turnLeft(800, 110);
+    turnLeft(780, 110);
   }
   else{
-    turnRight(800, 110);
+    turnRight(780, 110);
   }
   //eject ball
   autonFlywheel(-127);
-  forwardCoast(1500, 100, 800);
+  forwardCoast(1500, 127, 780);
   autonFlywheel(0);
 
   autonRollers(127);
   setFlywheel(0, true);
-  forwardCoast(1000, 100, 800);
+  forwardCoast(1000, 127, 780);
   setFlywheel(0, true);
-  forwardCoast(1100, 80, 800);
+  forwardCoast(1130, 100, 780);
   setRollers(0, false);
-  brake(-20);
+  brake(-30);
 
   //shoot second goal
   if(left){
@@ -693,12 +693,13 @@ void firstHalf(){
     turnLeft(1800, 110);
   }
   //run_flywheel = true;
-  forwardCoast(1800, 85, 1800);
-  middleGoal(true, 3000);
+  //setRollers(0, false);
+  forwardCoast(1800, 115, 1800);
+  middleGoal(true, MIDDLEGOALTIMEOUT);
 
   /*Third Goal*/
   //Spit out blue ball
-  backwardCoast(450, 100, 1800);
+  backwardCoast(450, 127, 1800);
   brake(20);
   autonRollers(127);
   if(left){
@@ -712,8 +713,8 @@ void firstHalf(){
   autonFlywheel(-127);
 
   //pick up corner ball
-  forwardCoast(700, 100, 900);
-  forwardCoast(1200, 90, 900);
+  forwardCoast(700, 127, 900);
+  forwardCoast(1200, 115, 900);
   //stop ejection
   autonFlywheel(0);
   forwardCoast(900, 80, 900);
@@ -730,23 +731,23 @@ void firstHalf(){
   }
   setFlywheel(0, true);
 
-  forwardCoast(500, 90, 600);
+  forwardCoast(500, 100, 600);
   setRollers(0, false);
-  forwardCoast(500, 90, 600);
+  forwardCoast(500, 100, 600);
   delay(200);
-  backwardCoast(1500, 100, 900);
+  backwardCoast(1500, 110, 900);
   brake(20);
 
   if(left)
   {
-    turnLeft(1300, 100);
+    turnLeft(1300, 110);
   }
   else
   {
-    turnRight(1300, 100);
+    turnRight(1300, 110);
   }
-  forwardCoast(1200, 100, 1300);
-  cornerGoal(true, 3000);
+  forwardCoast(1200, 110, 1300);
+  cornerGoal(true, CORNERGOALTIMEOUT);
   delay(100);
 }
 
@@ -869,8 +870,9 @@ void progSkills(bool left){
   //First Goal
   //pick up first ball
   setRollers(0, true);
-  forwardCoast(625, 127, 0);
-  delay(450);
+  forwardCoast(1250, 127, 0);
+  delay(50);
+  brake(-20);
 
   //align with first goal
   if(left){
@@ -879,7 +881,7 @@ void progSkills(bool left){
   else{
     turnRight(-1275, 110);
   }
-  forwardCoast(1400, 85, -1275);
+  forwardCoast(1400, 127, -1275);
 
   //shoot first goal
   cornerGoal(true, 3000);
@@ -891,28 +893,31 @@ void progSkills(bool left){
 
   //go to next ball next to middle goal
   //Fourth Goal
-  backwardCoast(200, 100, 1300);
-  setFlywheel(0, true);
+  autonRollers(127);
+  setFlywheel(0, false);
+  backwardCoast(200, 127, 1300);
+  autonRollers(0);
+  delay(50);
   autonRollers(-127);
-  backwardCoast(1000, 100, 1300);
+  backwardCoast(1000, 127, 1300);
   brake(20);
   autonRollers(0);
   if(left)
   {
-    turnLeft(-220, 100);
+    turnLeft(-200, 100);
   }
   else
   {
-    turnRight(-220, 100);
+    turnRight(-200, 100);
   }
 
   autonRollers(127);
   //ejecting
   run_flywheel = false;
   autonFlywheel(-127);
-  forwardCoast(1000, 100, -220);
-  forwardCoast(1000, 90, -220);
-  forwardCoast(1200, 75, -220);
+  forwardCoast(1000, 127, -200);
+  forwardCoast(1000, 115, -200);
+  forwardCoast(1200, 75, -200);
   brake(-20);
   autonFlywheel(0);
   run_flywheel = true;
@@ -928,17 +933,17 @@ void progSkills(bool left){
   }
   setRollers(0, false);
   //run_intake = true;
-  forwardCoast(600, 75, 900);
+  forwardCoast(600, 100, 900);
   run_flywheel = false;
-  forwardCoast(1200, 75, 900);
+  forwardCoast(1200, 100, 900);
 
   delay(500);
   autonRollers(0);
-  middleGoal(true, 3000);
+  middleGoal(true, MIDDLEGOALTIMEOUT);
   delay(100);
 
   //Fifth Goal
-  backwardCoast(1100, 100, 900);
+  backwardCoast(1100, 115, 900);
   brake(10);
 
   autonRollers(127);
@@ -952,10 +957,10 @@ void progSkills(bool left){
   {
     turnRight(0, 100);
   }
-  forwardCoast(3000, 100, 0);
+  forwardCoast(3000, 127, 0);
   delay(200);
   setFlywheel(0, false);
-  backwardCoast(800, 90, 0);
+  backwardCoast(800, 100, 0);
   brake(20);
 
   //turn towards goal

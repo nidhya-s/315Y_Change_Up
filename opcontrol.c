@@ -13,7 +13,7 @@ extern void initializeDriveMotors();
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-#define TOPSENSOR 2700
+#define TOPSENSOR 2400
 #define BOTTOMSENSOR 2700
 //#define TOPSENSORINDEX 2400
 int shootBalls = 0;
@@ -43,7 +43,7 @@ void drive(void* param){
 }
 void preGoal(){
   int curtime = millis();
-  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && (millis() - curtime) < 500)
+  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && (millis() - curtime) < 750)
   {
     motor_move(PORT_FLYWHEEL, 127);
     delay(20);
@@ -266,9 +266,14 @@ void shooting(void* param){
       cornerGoal(false, 0);
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_RIGHT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_RIGHT)){
+      motor_move(PORT_ROLLERS, 0);
+      motor_move(PORT_FLYWHEEL, 0);
       cornerGoalOneRed(false);
     }
-
+    if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN)){
+      motor_move(PORT_ROLLERS, 0);
+      motor_move(PORT_FLYWHEEL, 0);
+    }
     delay(50);
   }
   motor_move(PORT_ROLLERS, 80);
