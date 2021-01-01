@@ -46,7 +46,7 @@
 
 #define TDRIVEPOSTOL 150 //6
 
-#define STARTHEADING 900
+#define STARTHEADING 0
 
 #define GYRO_START 0
 
@@ -704,7 +704,7 @@ void firstHalf(){
   //run_flywheel = true;
   //setRollers(0, false);
   forwardCoast(1800, 115, 1800);
-  assignDriveMotorsAuton(10);
+  assignDriveMotorsAuton(20);
   middleGoal(true, MIDDLEGOALTIMEOUT);
   assignDriveMotorsAuton(0);
 
@@ -758,9 +758,7 @@ void firstHalf(){
     turnRight(1300, 110);
   }
   forwardCoast(1200, 110, 1300);
-  assignDriveMotorsAuton(10);
   cornerGoal(true, CORNERGOALTIMEOUT);
-  assignDriveMotorsAuton(0);
   delay(100);
 }
 
@@ -824,7 +822,7 @@ void secondHalf(){
   //run_flywheel = true;
   forwardCoast(1800, 110, 1800 + headingChange);
   assignDriveMotorsAuton(20);
-  middleGoal(true, 3000);
+  middleGoal(true, 2000);
   assignDriveMotorsAuton(0);
 
   /*Third Goal*/
@@ -877,14 +875,12 @@ void secondHalf(){
     turnRight(1300 + headingChange, 100);
   }
   forwardCoast(1250, 120, 1300 + headingChange);
-  assignDriveMotorsAuton(20);
   cornerGoal(true, 3000);
-  assignDriveMotorsAuton(0);
   delay(100);
 }
 
 void progSkills(bool left){
-  /*setFlywheel(0, true);
+  setFlywheel(0, true);
   //First Goal
   //pick up first ball
   setRollers(0, true);
@@ -902,9 +898,7 @@ void progSkills(bool left){
   forwardCoast(1400, 127, -1275);
 
   //shoot first goal
-  assignDriveMotorsAuton(10);
   cornerGoal(true, 3000);
-  assignDriveMotorsAuton(0);
 
 
 
@@ -950,8 +944,7 @@ void progSkills(bool left){
   else
   {
     turnRight(900, 100);
-  }*/
-  run_flywheel = true;
+  }
   setRollers(0, false);
   //run_intake = true;
   forwardCoast(600, 100, 900);
@@ -966,7 +959,7 @@ void progSkills(bool left){
   delay(100);
 
   //Fifth Goal
-  backwardCoast(950, 115, 900);
+  backwardCoast(1000, 115, 900);
   brake(10);
 
   autonRollers(127);
@@ -1012,7 +1005,7 @@ void progSkills(bool left){
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(700, 120, 3100);
+  backwardCoast(650, 120, 3100);
   brake(20);
   autonRollers(0);
   if(left)
@@ -1045,9 +1038,7 @@ void progSkills(bool left){
   autonRollers(0);
   delay(500);
   run_flywheel = false;
-  assignDriveMotorsAuton(20);
   middleGoalOneRed(true, 2000);
-  assignDriveMotorsAuton(0);
 
   backwardCoast(400, 120, 2700);
   brake(20);
@@ -1086,12 +1077,12 @@ void progSkills(bool left){
   {
     turnLeft(925, 100);
   }
+  autonFlywheel(127);
                       //950
   forwardCoast(300, 70, 925);
-  autonFlywheel(127);
-  delay(700);
+  delay(900);
   assignDriveMotorsAuton(-127);
-  delay(600);
+  delay(300);
   assignDriveMotorsAuton(0);
 }
 

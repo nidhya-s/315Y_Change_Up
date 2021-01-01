@@ -17,14 +17,18 @@ extern void initializeDriveMotors();
 #define BOTTOMSENSOR 2700
 //#define TOPSENSORINDEX 2400
 int shootBalls = 0;
+
+int intakeDirection = 0;
 extern adi_gyro_t gyro;
 
-/*void assignDriveMotors(int leftSide, int rightSide){
+void assignDriveMotors(int leftSide, int rightSide){
     motor_move(PORT_DRIVELEFTFRONT, leftSide);
+    motor_move(PORT_DRIVELEFTMIDDLE, leftSide);
     motor_move(PORT_DRIVELEFTBACK, leftSide);
     motor_move(PORT_DRIVERIGHTFRONT, rightSide);
+    motor_move(PORT_DRIVERIGHTMIDDLE, rightSide);
     motor_move(PORT_DRIVERIGHTBACK, rightSide);
-}*/
+}
 
 void drive(void* param){
     int i = 100;
@@ -204,6 +208,7 @@ void cornerGoal(bool auton, int timeout){
   bool pressed = false;
   motor_move(PORT_FLYWHEEL, 127);
   motor_move(PORT_ROLLERS, -127);
+  intakeDirection = 1;
   int prevbottom = 0;
   int prevtop = 0;
   int timetop = 0;
@@ -217,6 +222,7 @@ void cornerGoal(bool auton, int timeout){
     if(!auton && (controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN))){
       motor_move(PORT_FLYWHEEL, 0);
       motor_move(PORT_ROLLERS, 0);
+      intakeDirection = 0;
       break;
     }
     if(timetop != 0){
@@ -236,10 +242,12 @@ void cornerGoal(bool auton, int timeout){
       if(ballsintake == 1)
       {
         motor_move(PORT_ROLLERS, 0);
+        intakeDirection = 0;
         timebot = millis();
       }
       if(ballsintake >= 2){
         motor_move(PORT_ROLLERS, 0);
+        intakeDirection = 0;
       }
     }
 
@@ -251,6 +259,7 @@ void cornerGoal(bool auton, int timeout){
         timetop = millis();
       }
     }
+    intakeDirection = 0;
     prevtop = curtop;
     delay(50);
   }
@@ -264,6 +273,10 @@ void shooting(void* param){
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_UP) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_UP)){
       cornerGoal(false, 0);
+      motor_move(PORT_ROLLERS, 127);
+      intakeDirection = -1;
+      //assignDriveMotors(-127, -127);
+      delay(50);
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_RIGHT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_RIGHT)){
       motor_move(PORT_ROLLERS, 0);
@@ -281,7 +294,6 @@ void shooting(void* param){
   motor_move(PORT_ROLLERS, 0);
 }
 void rollers(void* param){
-    int intakeDirection = 0;
     int ballCount = 0;
     while (true) {
         if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_A) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_A)){
