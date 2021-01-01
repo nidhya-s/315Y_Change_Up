@@ -53,6 +53,14 @@ void preGoal(){
     delay(20);
   }
 }
+void preGoalMiddle(){
+  int curtime = millis();
+  while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR && (millis() - curtime) < 1000)
+  {
+    motor_move(PORT_FLYWHEEL, 127);
+    delay(20);
+  }
+}
 void middleGoal(bool auton, int timeout){
   preGoal();
   int timeoutTimer = -1;
@@ -106,7 +114,7 @@ void middleGoal(bool auton, int timeout){
   motor_move(PORT_ROLLERS, 0);
 }
 void middleGoalOneRed(bool auton, int timeout){
-  preGoal();
+  preGoalMiddle();
   int timeoutTimer = -1;
   if(timeout!= 0)
   {
@@ -127,7 +135,7 @@ void middleGoalOneRed(bool auton, int timeout){
     }
     int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
     if(time != 0){
-      if((millis() - time) > 300){
+      if((millis() - time) > 450){
         motor_move(PORT_FLYWHEEL, 0);
       }
     }
