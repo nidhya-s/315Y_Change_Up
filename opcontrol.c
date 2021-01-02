@@ -240,7 +240,7 @@ void cornerGoal(bool auton, int timeout){
     }
     if(timebot != 0)
     {
-      if((millis() - timebot) > 300){
+      if((millis() - timebot) > 200){
         motor_move(PORT_ROLLERS, -127);
         timebot = 0;
       }

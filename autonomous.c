@@ -644,14 +644,15 @@ void holdPower(bool on){
 
 void firstHalf(){
   //spit out one ball
-  autonRollers(127);
+
   setFlywheel(0, false);
+  backwardCoast(100, 127, -1275);
+  autonRollers(127);
   backwardCoast(200, 127, -1275);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  //delay(200);
-  backwardCoast(700, 127, -1275);
+  backwardCoast(600, 127, -1275);
 
   backwardCoast(800, 127, -1275);
   autonRollers(0);
@@ -767,13 +768,14 @@ void secondHalf(){
   int headingChange = 1800;
 
   //spit out one ball
-  autonRollers(127);
   setFlywheel(0, false);
+  backwardCoast(100, 127, -1325+headingChange);
+  autonRollers(127);
   backwardCoast(200, 127, -1325 + headingChange);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(1000, 120, -1325 + headingChange);
+  backwardCoast(900, 120, -1325 + headingChange);
   delay(20);
   autonRollers(0);
 
@@ -787,8 +789,8 @@ void secondHalf(){
   autonRollers(127);
   setRollers(0, false);
 
-  forwardCoast(2000, 110, 900);
-  delay(300);
+  forwardCoast(1800, 110, 900);
+  delay(200);
   run_flywheel = false; //Second Goal
 
   //turn to pick up ball
@@ -908,13 +910,14 @@ void progSkills(bool left){
 
   //go to next ball next to middle goal
   //Fourth Goal
-  autonRollers(127);
   setFlywheel(0, false);
+  backwardCoast(100, 127, 1300);
+  autonRollers(127);
   backwardCoast(200, 127, 1300);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(1000, 127, 1300);
+  backwardCoast(900, 127, 1300);
   brake(20);
   autonRollers(0);
   if(left)
@@ -960,7 +963,7 @@ void progSkills(bool left){
   delay(100);
 
   //Fifth Goal
-  backwardCoast(1000, 115, 900);
+  backwardCoast(1150, 115, 900);
   brake(10);
 
   autonRollers(127);
@@ -974,7 +977,8 @@ void progSkills(bool left){
   {
     turnRight(0, 100);
   }
-  forwardCoast(2750, 127, 0);
+  forwardCoast(2300, 127, 0);
+  forwardCoast(450, 100, 0);
   delay(200);
   setFlywheel(0, false);
   backwardCoast(1000, 127, 0);
@@ -992,7 +996,8 @@ void progSkills(bool left){
 
   forwardCoast(1800, 110, 475);
   autonRollers(0);
-  delay(500);
+  delay(200);
+  run_flywheel = false;
   assignDriveMotorsAuton(10);
   cornerGoalOneRed(true);
   assignDriveMotorsAuton(0);
@@ -1001,13 +1006,14 @@ void progSkills(bool left){
   secondHalf();
 
   //Eight Goal
-  autonRollers(127);
   setFlywheel(0, false);
+  backwardCoast(100, 127, 3100);
+  autonRollers(127);
   backwardCoast(200, 127, 3100);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(600, 120, 3100);
+  backwardCoast(500, 120, 3100);
   brake(20);
   delay(200);
   autonRollers(0);
@@ -1102,13 +1108,15 @@ void progSkills(bool left){
   }
   autonFlywheel(127);
                       //950
+  assignDriveMotorsAuton(15);
   forwardCoast(300, 70, 900);
   delay(900);
-  backwardCoast(500, 80, 750);
-  forwardCoast(1000, 100, 750);
-  backwardCoast(500, 80, 750);
-  forwardCoast(700, 100, 750);
-  backwardCoast(500, 80, 750);
+  assignDriveMotorsAuton(0);
+  backwardCoast(500, 80, 650);
+  forwardCoast(1000, 100, 700);
+  backwardCoast(500, 80, 700);
+  forwardCoast(1000, 100, 700);
+  backwardCoast(500, 80, 700);
 }
 
 void displayInfoAuton(void *param){
