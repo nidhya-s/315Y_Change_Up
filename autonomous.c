@@ -44,7 +44,7 @@
 
 #define TDRIVEMAXVEL 5
 
-#define TDRIVEPOSTOL 150 //6
+#define TDRIVEPOSTOL 90 //6
 
 #define STARTHEADING 0
 
@@ -654,7 +654,7 @@ void firstHalf(){
   autonRollers(-127);
   backwardCoast(600, 127, -1275);
 
-  backwardCoast(800, 127, -1275);
+  backwardCoast(600, 127, -1275);
   autonRollers(0);
   delay(200);
   autonRollers(127);
@@ -666,7 +666,7 @@ void firstHalf(){
     turnLeft(-900, 110);
   }
 
-  forwardCoast(1600, 105, -900);
+  forwardCoast(1500, 105, -900);
   setRollers(0, false);
   delay(300);
   run_flywheel = false;
@@ -677,21 +677,21 @@ void firstHalf(){
 
   //pick up other ball
   if(left){
-    turnLeft(780, 110);
+    turnLeft(800, 110);
   }
   else{
-    turnRight(780, 110);
+    turnRight(800, 110);
   }
   //eject ball
   autonFlywheel(-127);
-  forwardCoast(1500, 127, 780);
+  forwardCoast(1500, 127, 790);
   autonFlywheel(0);
 
   autonRollers(127);
   setFlywheel(0, true);
-  forwardCoast(1000, 127, 780);
+  forwardCoast(1000, 127, 790);
   setFlywheel(0, true);
-  forwardCoast(1130, 100, 780);
+  forwardCoast(1300, 100, 790);
   setRollers(0, false);
   brake(-30);
 
@@ -737,16 +737,16 @@ void firstHalf(){
 
   //pick up wall ball
   if(left){
-    turnLeft(600, 110);
+    turnLeft(650, 110);
   }
   else{
-    turnLeft(600, 110);
+    turnLeft(650, 110);
   }
   setFlywheel(0, true);
 
-  forwardCoast(500, 100, 600);
+  forwardCoast(500, 100, 650);
   setRollers(0, false);
-  forwardCoast(500, 100, 600);
+  forwardCoast(500, 100, 650);
   delay(200);
   backwardCoast(1500, 110, 900);
   brake(20);
@@ -759,7 +759,7 @@ void firstHalf(){
   {
     turnRight(1300, 110);
   }
-  forwardCoast(1200, 110, 1300);
+  forwardCoast(1350, 110, 1300);
   cornerGoal(true, CORNERGOALTIMEOUT);
   delay(100);
 }
@@ -769,14 +769,14 @@ void secondHalf(){
 
   //spit out one ball
   setFlywheel(0, false);
-  backwardCoast(100, 127, -1325+headingChange);
   autonRollers(127);
   backwardCoast(200, 127, -1325 + headingChange);
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(900, 120, -1325 + headingChange);
+  backwardCoast(1000, 120, -1325 + headingChange);
   delay(20);
+  delay(200);
   autonRollers(0);
 
 
@@ -789,7 +789,7 @@ void secondHalf(){
   autonRollers(127);
   setRollers(0, false);
 
-  forwardCoast(1800, 110, 900);
+  forwardCoast(1700, 100, 900);
   delay(200);
   run_flywheel = false; //Second Goal
 
@@ -922,20 +922,20 @@ void progSkills(bool left){
   autonRollers(0);
   if(left)
   {
-    turnLeft(-200, 100);
+    turnLeft(-180, 100);
   }
   else
   {
-    turnRight(-200, 100);
+    turnRight(-180, 100);
   }
 
   autonRollers(127);
   //ejecting
   run_flywheel = false;
   autonFlywheel(-127);
-  forwardCoast(1000, 127, -200);
-  forwardCoast(1000, 115, -200);
-  forwardCoast(1200, 75, -200);
+  forwardCoast(1000, 127, -180);
+  forwardCoast(1000, 115, -180);
+  forwardCoast(1200, 75, -180);
   brake(-20);
   autonFlywheel(0);
   run_flywheel = true;
@@ -1013,7 +1013,7 @@ void progSkills(bool left){
   autonRollers(0);
   delay(50);
   autonRollers(-127);
-  backwardCoast(500, 120, 3100);
+  backwardCoast(400, 120, 3100);
   brake(20);
   delay(200);
   autonRollers(0);
@@ -1077,16 +1077,17 @@ void progSkills(bool left){
   //Ninth Ball
   if(left)
   {
-    turnRight(900, 100);
+    turnRight(930, 100);
   }
   else
   {
-    turnLeft(900, 100);
+    turnLeft(930, 100);
   }
 
-  forwardCoast(800, 127, 900);
+  autonRollers(127);
+  forwardCoast(800, 110, 930);
   delay(200);
-  forwardCoast(400, 110, 900);
+  forwardCoast(400, 90, 930);
   delay(200);
   autonFlywheel(0);
 
@@ -1096,27 +1097,28 @@ void progSkills(bool left){
   backwardCoast(500, 70, 750);
   forwardCoast(1000, 90, 750);
   backwardCoast(500, 70, 750);*/
-  forwardCoast(800, 100, 650);
+  forwardCoast(800, 100, 750);
   backwardCoast(600, 70, 750);
   if(left)
   {
-    turnRight(900, 100);
+    turnRight(870, 100);
   }
   else
   {
-    turnLeft(900, 100);
+    turnLeft(870, 100);
   }
   autonFlywheel(127);
                       //950
-  assignDriveMotorsAuton(15);
-  forwardCoast(300, 70, 900);
-  delay(900);
+
+  forwardCoast(300, 60, 870);
+  assignDriveMotorsAuton(20);
+  delay(1100);
   assignDriveMotorsAuton(0);
-  backwardCoast(500, 80, 650);
-  forwardCoast(1000, 100, 700);
-  backwardCoast(500, 80, 700);
-  forwardCoast(1000, 100, 700);
-  backwardCoast(500, 80, 700);
+  backwardCoast(500, 80, 870);
+  forwardCoast(1000, 100, 725);
+  backwardCoast(500, 80, 750);
+  forwardCoast(1000, 100, 800);
+  backwardCoast(500, 80, 800);
 }
 
 void displayInfoAuton(void *param){

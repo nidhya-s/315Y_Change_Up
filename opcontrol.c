@@ -161,7 +161,7 @@ void middleGoalOneRed(bool auton, int timeout){
   motor_move(PORT_ROLLERS, 0);
 }
 void cornerGoalOneRed(bool auton){
-  preGoal();
+  //preGoal();
   int ballsintake = 0;
   int ballsshoot = 0;
   bool pressed = false;
