@@ -15,6 +15,10 @@ extern void initializeDriveMotors();
 
 #define TOPSENSOR 2400
 #define BOTTOMSENSOR 2700
+
+#define TWOBALLMIDDLETIME 1250
+#define TWOBALLCORNERTIME 1425
+#define ONEBALLCORNERTIME 500
 //#define TOPSENSORINDEX 2400
 int shootBalls = 0;
 
@@ -61,8 +65,13 @@ void preGoalMiddle(){
     delay(20);
   }
 }
+
 void middleGoal(bool auton, int timeout){
-  preGoal();
+  if(!auton)
+  {
+    preGoal();
+  }
+
   int timeoutTimer = -1;
   if(timeout!= 0)
   {
@@ -108,6 +117,44 @@ void middleGoal(bool auton, int timeout){
       }
     }
     prevtop = curtop;
+    delay(50);
+  }
+  motor_move(PORT_FLYWHEEL, 0);
+  motor_move(PORT_ROLLERS, 0);
+}
+void middleGoal2and6(bool auton, int timeout){
+
+  int timeoutTimer = -1;
+  if(timeout!= 0)
+  {
+    timeoutTimer = millis();
+  }
+  int ballsintake = 0;
+  bool pressed = false;
+  motor_move(PORT_FLYWHEEL, 127);
+  motor_move(PORT_ROLLERS, -127);
+  int prevbottom = 0;
+  int prevtop = 0;
+  int time = millis();
+  while(ballsintake < 1 || (millis() - time) < TWOBALLMIDDLETIME){
+    if(timeoutTimer != -1 && millis() - timeoutTimer >= timeout)
+    {
+      break;
+    }
+    int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
+    if(!auton && (controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN))){
+      motor_move(PORT_FLYWHEEL, 0);
+      motor_move(PORT_ROLLERS, 0);
+      break;
+    }
+    if((millis() - time) > TWOBALLMIDDLETIME){
+      motor_move(PORT_FLYWHEEL, 0);
+    }
+    if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR){
+      ballsintake++;
+      motor_move(PORT_ROLLERS, 0);
+    }
+    prevbottom = curbottom;
     delay(50);
   }
   motor_move(PORT_FLYWHEEL, 0);
@@ -160,6 +207,7 @@ void middleGoalOneRed(bool auton, int timeout){
   motor_move(PORT_FLYWHEEL, 0);
   motor_move(PORT_ROLLERS, 0);
 }
+
 void cornerGoalOneRed(bool auton){
   //preGoal();
   int ballsintake = 0;
@@ -204,6 +252,42 @@ void cornerGoalOneRed(bool auton){
   motor_move(PORT_FLYWHEEL, 0);
   motor_move(PORT_ROLLERS, 0);
 }
+void cornerGoalOneRedFast(bool auton){
+  //preGoal();
+  int ballsintake = 0;
+  int ballsshoot = 0;
+  bool pressed = false;
+  motor_move(PORT_FLYWHEEL, 127);
+  motor_move(PORT_ROLLERS, -127);
+  int prevbottom = 0;
+  int prevtop = 0;
+  int timetop = millis();
+  int timebot = 0;
+  while(ballsintake < 2 || (millis() - timetop) < ONEBALLCORNERTIME){
+    int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
+    if(!auton && (controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN))){
+      motor_move(PORT_FLYWHEEL, 0);
+      motor_move(PORT_ROLLERS, 0);
+      break;
+    }
+    if(timetop != 0){
+      if((millis() - timetop) > ONEBALLCORNERTIME){
+        motor_move(PORT_FLYWHEEL, 0);
+      }
+    }
+    if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR && ballsintake < 2){
+      ballsintake++;
+      if(ballsintake >= 2){
+        motor_move(PORT_ROLLERS, 0);
+      }
+    }
+    prevbottom = curbottom;
+    delay(50);
+  }
+  motor_move(PORT_FLYWHEEL, 0);
+  motor_move(PORT_ROLLERS, 0);
+}
+
 void cornerGoal(bool auton, int timeout){
   preGoal();
   int timeoutTimer = -1;
@@ -274,17 +358,77 @@ void cornerGoal(bool auton, int timeout){
   motor_move(PORT_FLYWHEEL, 0);
   motor_move(PORT_ROLLERS, 0);
 }
+void cornerGoalFast(bool auton, int timeout){
+  int timeoutTimer = -1;
+  if(timeout!= 0)
+  {
+    timeoutTimer = millis();
+  }
+  int ballsintake = 0;
+  motor_move(PORT_FLYWHEEL, 127);
+  motor_move(PORT_ROLLERS, -127);
+  intakeDirection = 1;
+  int prevbottom = 0;
+  int prevtop = 0;
+  int timetop = millis();
+  int timebot = 0;
+  while(ballsintake < 2 || (millis() - timetop) < TWOBALLCORNERTIME){
+    if(timeoutTimer != -1 && millis() - timeoutTimer >= timeout)
+    {
+      break;
+    }
+    int curbottom = adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM);
+    if(!auton && (controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN))){
+      motor_move(PORT_FLYWHEEL, 0);
+      motor_move(PORT_ROLLERS, 0);
+      intakeDirection = 0;
+      break;
+    }
+    if(timetop != 0){
+      if((millis() - timetop) > TWOBALLCORNERTIME){
+        motor_move(PORT_FLYWHEEL, 0);
+      }
+    }
+    if(timebot != 0)
+    {
+      if((millis() - timebot) > 200){
+        motor_move(PORT_ROLLERS, -127);
+        timebot = 0;
+      }
+    }
+    else if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR && ballsintake < 2){
+      ballsintake++;
+      if(ballsintake == 1)
+      {
+        motor_move(PORT_ROLLERS, 0);
+        intakeDirection = 0;
+        timebot = millis();
+      }
+      if(ballsintake >= 2){
+        motor_move(PORT_ROLLERS, 0);
+        intakeDirection = 0;
+      }
+    }
+    prevbottom = curbottom;
+
+    intakeDirection = 0;
+    delay(50);
+  }
+  motor_move(PORT_FLYWHEEL, 0);
+  motor_move(PORT_ROLLERS, 0);
+}
 void shooting(void* param){
   while(true){
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_LEFT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_LEFT)){
-      middleGoal(false, 0);
+      //middleGoal(false, 0);
+      middleGoal2and6(false, 0);
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_UP) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_UP)){
       cornerGoal(false, 0);
-      motor_move(PORT_ROLLERS, 127);
+      /*motor_move(PORT_ROLLERS, 127);
       intakeDirection = -1;
       //assignDriveMotors(-127, -127);
-      delay(50);
+      delay(50);*/
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_RIGHT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_RIGHT)){
       motor_move(PORT_ROLLERS, 0);
