@@ -17,7 +17,7 @@ extern void initializeDriveMotors();
 #define BOTTOMSENSOR 2700
 
 #define TWOBALLMIDDLETIME 1250
-#define TWOBALLCORNERTIME 1425
+#define TWOBALLCORNERTIME 1350
 #define ONEBALLCORNERTIME 500
 //#define TOPSENSORINDEX 2400
 int shootBalls = 0;
@@ -25,18 +25,34 @@ int shootBalls = 0;
 int intakeDirection = 0;
 extern adi_gyro_t gyro;
 
-void assignDriveMotors(int leftSide, int rightSide){
-    motor_move(PORT_DRIVELEFTFRONT, leftSide);
-    motor_move(PORT_DRIVELEFTMIDDLE, leftSide);
-    motor_move(PORT_DRIVELEFTBACK, leftSide);
-    motor_move(PORT_DRIVERIGHTFRONT, rightSide);
-    motor_move(PORT_DRIVERIGHTMIDDLE, rightSide);
-    motor_move(PORT_DRIVERIGHTBACK, rightSide);
+extern void progSkills(bool left);
+
+void assignDriveMotors(int power){
+    motor_move(PORT_DRIVELEFTFRONT, power);
+    motor_move(PORT_DRIVELEFTMIDDLE, power);
+    motor_move(PORT_DRIVERIGHTFRONT, power);
+    motor_move(PORT_DRIVELEFTBACK, power);
+    motor_move(PORT_DRIVERIGHTMIDDLE, power);
+    motor_move(PORT_DRIVERIGHTBACK, power);
 }
 
 void drive(void* param){
     int i = 100;
     while (true) {
+      /*if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_Y))
+      {
+        progSkills(true);
+      }*/
+      if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_B) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_B)){
+        motor_move(PORT_FLYWHEEL, 127);
+        assignDriveMotors(-35);
+        delay(800);
+        assignDriveMotors(60);
+        delay(200);
+        motor_move(PORT_FLYWHEEL, 0);
+        assignDriveMotors(0);
+      }
+      else{
         int forward = -controller_get_analog(CONTROLLER_MASTER, ANALOG_RIGHT_X);
         int turn = controller_get_analog(CONTROLLER_MASTER, ANALOG_LEFT_Y);
 
@@ -47,6 +63,7 @@ void drive(void* param){
         motor_move(PORT_DRIVERIGHTMIDDLE, -max(-127, min(127, forward - turn)));
         motor_move(PORT_DRIVERIGHTBACK, -max(-127, min(127, forward - turn)));
         delay(20);
+      }
     }
 }
 void preGoal(){
@@ -131,6 +148,8 @@ void middleGoal2and6(bool auton, int timeout){
   }
   int ballsintake = 0;
   bool pressed = false;
+
+  int bottomTimer = millis();
   motor_move(PORT_FLYWHEEL, 127);
   motor_move(PORT_ROLLERS, -127);
   int prevbottom = 0;
@@ -150,7 +169,12 @@ void middleGoal2and6(bool auton, int timeout){
     if((millis() - time) > TWOBALLMIDDLETIME){
       motor_move(PORT_FLYWHEEL, 0);
     }
-    if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR){
+    if(bottomTimer != 0 && (bottomTimer - millis()) < 200)
+    {
+
+    }
+    else if(curbottom <= BOTTOMSENSOR && prevbottom > BOTTOMSENSOR){
+      bottomTimer = 0;
       ballsintake++;
       motor_move(PORT_ROLLERS, 0);
     }
@@ -424,11 +448,11 @@ void shooting(void* param){
       middleGoal2and6(false, 0);
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_UP) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_UP)){
-      cornerGoal(false, 0);
-      /*motor_move(PORT_ROLLERS, 127);
+      cornerGoalFast(false, 0);
+      motor_move(PORT_ROLLERS, 127);
       intakeDirection = -1;
       //assignDriveMotors(-127, -127);
-      delay(50);*/
+      delay(50);
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_RIGHT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_RIGHT)){
       motor_move(PORT_ROLLERS, 0);
@@ -519,13 +543,13 @@ void flywheel(void* param){
         motor_move(PORT_FLYWHEEL, 0);
         flywheelDirection = 0;
       }
-      if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_B) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_B)){
+      /*if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_B) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_B)){
         motor_move(PORT_FLYWHEEL, 127);
         flywheelDirection = 1;
         delay(210);
         motor_move(PORT_FLYWHEEL, 0);
         flywheelDirection = 0;
-      }
+      }*/
       if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_L1) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_L1)){
         if(flywheelDirection == 0 || flywheelDirection == -1){
           motor_move(PORT_FLYWHEEL, 127);
@@ -555,8 +579,7 @@ void flywheel(void* param){
       delay(20);
     }
 }
-void displayInfo(void *param)
-{
+void displayInfo(void *param){
    lcd_initialize();
    while (true)
    {

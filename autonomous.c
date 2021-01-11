@@ -86,6 +86,8 @@ extern void cornerGoalFast(bool auton, int timeout);
 
 extern void cornerGoalOneRed(bool auton);
 
+extern void cornerGoalOneRedFast(bool auton);
+
 extern void middleGoal2and6(bool auton, int timeout);
 
 #define max(a, b) \
@@ -667,7 +669,7 @@ void progSkills(bool left){
   autonRollers(127);
   backwardCoast(200, 127, -1275);
   autonRollers(0);
-  delay(50);
+  delay(20);
   autonRollers(-127);
   backwardCoast(600, 127, -1275);
 
@@ -718,7 +720,7 @@ void progSkills(bool left){
   else{
     turnLeft(1800, 110);
   }
-  setRollers(0, false);
+  //setRollers(0, false);
   forwardCoast(1800, 115, 1800);
 
   middleGoal2and6(true, MIDDLEGOALTIMEOUT);
@@ -748,7 +750,7 @@ void progSkills(bool left){
   forwardCoast(900, 80, 900);
 
   brake(-20);
-  delay(100);
+  delay(50);
 
 
   //pick up wall ball
@@ -763,7 +765,7 @@ void progSkills(bool left){
   forwardCoast(500, 100, 650);
 
   forwardCoast(500, 100, 650);
-  delay(200);
+  delay(175);
   setRollers(0, false);
   backwardCoast(1500, 110, 900);
   brake(20);
@@ -778,7 +780,7 @@ void progSkills(bool left){
   forwardCoast(1350, 110, 1300);
   autonRollers(0);
   cornerGoalFast(true, CORNERGOALTIMEOUT);
-  delay(20);
+  autonRollers(-127);
 
   //Fourth Goal
   //**********************************************************************************************************
@@ -788,7 +790,7 @@ void progSkills(bool left){
   autonRollers(127);
   backwardCoast(200, 127, 1300);
   autonRollers(0);
-  delay(50);
+  delay(20);
   autonRollers(-127);
   backwardCoast(900, 127, 1300);
   brake(20);
@@ -827,7 +829,7 @@ void progSkills(bool left){
   run_flywheel = false;
   forwardCoast(1200, 100, 900);
 
-  delay(500);
+  delay(350);
   autonRollers(0);
   assignDriveMotorsAuton(20);
   middleGoal2and6(true, MIDDLEGOALTIMEOUT);
@@ -869,10 +871,10 @@ void progSkills(bool left){
 
   forwardCoast(1800, 110, 475);
   autonRollers(0);
-  delay(200);
+  delay(175);
   run_flywheel = false;
   assignDriveMotorsAuton(10);
-  cornerGoalOneRed(true);
+  cornerGoalOneRedFast(true);
   assignDriveMotorsAuton(0);
   delay(20);
 
@@ -885,7 +887,7 @@ void progSkills(bool left){
   autonRollers(127);
   backwardCoast(200, 127, -1325 + headingChange);
   autonRollers(0);
-  delay(50);
+  delay(20);
   autonRollers(-127);
   backwardCoast(1000, 120, -1325 + headingChange);
   delay(20);
@@ -903,7 +905,7 @@ void progSkills(bool left){
   setRollers(0, false);
 
   forwardCoast(1700, 100, 900);
-  delay(200);
+  delay(175);
   run_flywheel = false;
 
   //turn to pick up ball
@@ -979,7 +981,7 @@ void progSkills(bool left){
   forwardCoast(500, 120, 600 + headingChange);
   setRollers(0, false);
   forwardCoast(500, 120, 600 + headingChange);
-  delay(200);
+  delay(175);
   backwardCoast(1500, 120, 900 + headingChange);
   brake(20);
 
@@ -993,7 +995,7 @@ void progSkills(bool left){
   }
   forwardCoast(1500, 120, 1300 + headingChange);
   cornerGoalFast(true, CORNERGOALTIMEOUT);
-  delay(20);
+  autonRollers(-127);
 
   //Eighth Goal
   //**********************************************************************************************************
@@ -1002,7 +1004,7 @@ void progSkills(bool left){
   autonRollers(127);
   backwardCoast(200, 127, 3100);
   autonRollers(0);
-  delay(50);
+  delay(20);
   autonRollers(-127);
   backwardCoast(450, 120, 3100);
   brake(20);
@@ -1044,17 +1046,17 @@ void progSkills(bool left){
 
   if(left)
   {
-    turnRight(930, 100);
+    turnRight(900, 100);
   }
   else
   {
-    turnLeft(930, 100);
+    turnLeft(900, 100);
   }
 
   autonRollers(127);
-  forwardCoast(800, 110, 930);
+  forwardCoast(800, 110, 900);
   delay(200);
-  forwardCoast(400, 90, 930);
+  forwardCoast(400, 90, 900);
   delay(200);
   autonFlywheel(0);
 
@@ -1074,10 +1076,11 @@ void progSkills(bool left){
   assignDriveMotorsAuton(20);
   delay(1000);
   assignDriveMotorsAuton(0);
-  backwardCoast(500, 80, 870);
-  forwardCoast(1000, 100, 725);
-  backwardCoast(500, 80, 750);
+  backwardCoast(500, 80, 825);
+  forwardCoast(1000, 100, 700);
+  backwardCoast(500, 80, 725);
   forwardCoast(1000, 100, 800);
+  autonRollers(0);
   backwardCoast(500, 80, 800);
 }
 
