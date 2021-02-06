@@ -13,8 +13,8 @@ extern void initializeDriveMotors();
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-#define TOPSENSOR 2400
-#define BOTTOMSENSOR 2700
+#define TOPSENSOR 2475
+#define BOTTOMSENSOR 2650
 
 #define TWOBALLMIDDLETIME 1250
 #define TWOBALLCORNERTIME 1350
@@ -26,6 +26,17 @@ int intakeDirection = 0;
 extern adi_gyro_t gyro;
 
 extern void progSkills(bool left);
+extern void autonomous();
+extern void initialize();
+extern void preAuton();
+
+extern task_t displayInfoTask;
+
+extern task_t heading;
+
+extern task_t intakeIndex;
+
+extern task_t flywheelIndex;
 
 void assignDriveMotors(int power){
     motor_move(PORT_DRIVELEFTFRONT, power);
@@ -41,7 +52,8 @@ void drive(void* param){
     while (true) {
       /*if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_Y))
       {
-        progSkills(true);
+        autonomous();
+        break;
       }*/
       if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_B) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_B)){
         motor_move(PORT_FLYWHEEL, 127);
@@ -449,10 +461,10 @@ void shooting(void* param){
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_UP) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_UP)){
       cornerGoalFast(false, 0);
-      motor_move(PORT_ROLLERS, 127);
+      /*motor_move(PORT_ROLLERS, 127);
       intakeDirection = -1;
       //assignDriveMotors(-127, -127);
-      delay(50);
+      delay(50);*/
     }
     if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_RIGHT) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_RIGHT)){
       motor_move(PORT_ROLLERS, 0);
@@ -610,7 +622,27 @@ void displayInfo(void *param){
       delay(10);
    }
 }
+void stopAllMotors()
+{
+  motor_move(PORT_DRIVELEFTFRONT, 0);
+  motor_move(PORT_DRIVELEFTMIDDLE, 0);
+  motor_move(PORT_DRIVELEFTBACK, 0);
+  motor_move(PORT_DRIVERIGHTFRONT, 0);
+  motor_move(PORT_DRIVERIGHTMIDDLE, 0);
+  motor_move(PORT_DRIVERIGHTBACK, 0);
+  motor_move(PORT_ROLLERS, 0);
+  motor_move(PORT_FLYWHEEL, 0);
+}
 void opcontrol() {
+  //stopAllMotors();
+  //task_delete(displayInfoTask);
+
+  //task_delete(heading);
+
+  //task_delete(intakeIndex);
+
+  //task_delete(flywheelIndex);
+
     task_t driveTask = task_create(drive, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive Task");
     task_t rolTask = task_create(rollers, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Rol Task");
     task_t flyTask = task_create(flywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Fly Task");
