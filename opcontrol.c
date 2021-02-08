@@ -2,7 +2,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <inttypes.h>
-extern void initializeDriveMotors();
+
  #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -23,20 +23,16 @@ extern void initializeDriveMotors();
 int shootBalls = 0;
 
 int intakeDirection = 0;
+int flywheelDirection = 0;
 extern adi_gyro_t gyro;
 
-extern void progSkills(bool left);
-extern void autonomous();
-extern void initialize();
-extern void preAuton();
+extern void stopAutonTasks();
 
-extern task_t displayInfoTask;
+task_t driveTask;
+task_t rolTask;
+task_t flyTask;
+task_t shootTask;
 
-extern task_t heading;
-
-extern task_t intakeIndex;
-
-extern task_t flywheelIndex;
 
 void assignDriveMotors(int power){
     motor_move(PORT_DRIVELEFTFRONT, power);
@@ -481,9 +477,12 @@ void shooting(void* param){
   delay(500);
   motor_move(PORT_ROLLERS, 0);
 }
+
+
 void rollers(void* param){
     int ballCount = 0;
     while (true) {
+
         if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_A) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_A)){
           bool pressed = false;
           intakeDirection = 1;
@@ -507,6 +506,14 @@ void rollers(void* param){
           }
 
         }
+
+       if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_DOWN) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_DOWN)){
+              motor_move(PORT_ROLLERS, 0);
+              motor_move(PORT_FLYWHEEL, 0);
+              intakeDirection = 0;
+              flywheelDirection = 0;
+       }
+
         if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_R1) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_R1)){
           if(intakeDirection == 0 || intakeDirection == -1){
             motor_move(PORT_ROLLERS, -127);
@@ -534,7 +541,7 @@ void rollers(void* param){
     }
 }
 void flywheel(void* param){
-    int flywheelDirection = 0;
+    flywheelDirection = 0;
     bool pressed = false;
     while(true)
     {
@@ -555,13 +562,6 @@ void flywheel(void* param){
         motor_move(PORT_FLYWHEEL, 0);
         flywheelDirection = 0;
       }
-      /*if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_B) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_B)){
-        motor_move(PORT_FLYWHEEL, 127);
-        flywheelDirection = 1;
-        delay(210);
-        motor_move(PORT_FLYWHEEL, 0);
-        flywheelDirection = 0;
-      }*/
       if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_L1) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_L1)){
         if(flywheelDirection == 0 || flywheelDirection == -1){
           motor_move(PORT_FLYWHEEL, 127);
@@ -591,61 +591,13 @@ void flywheel(void* param){
       delay(20);
     }
 }
-void displayInfo(void *param){
-   lcd_initialize();
-   while (true)
-   {
-      char tempString1[100];
-      char tempString2[100];
-      char tempString3[100];
-      char tempString4[100];
-      char tempString5[100];
-      char tempString6[100];
 
-      sprintf(tempString1, "Gyro Value: %d", (int)adi_gyro_get(gyro));
-      sprintf(tempString2, "IMU Value: %d", (int)imu_get_heading(IMU_PORT)*10);
-      sprintf(tempString3, "Balls Shot: %d", shootBalls);
-      sprintf(tempString4, "Line Sensor Value Top: %d", adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP));
-      sprintf(tempString5, "Line Sensor Value Bottom: %d", adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM));
 
-      lcd_set_text(1, tempString1);
-      lcd_set_text(2, tempString2);
-      lcd_set_text(3, tempString3);
-      lcd_set_text(4, tempString4);
-      lcd_set_text(5, tempString5);
-      lcd_set_text(6, tempString6);
-
-      printf("here\n");
-
-      //controller_print(CONTROLLER_MASTER, 0, 0, "RPM: %.2f", motor_get_actual_velocity(PORT_FLYWHEEL));
-
-      delay(10);
-   }
-}
-void stopAllMotors()
-{
-  motor_move(PORT_DRIVELEFTFRONT, 0);
-  motor_move(PORT_DRIVELEFTMIDDLE, 0);
-  motor_move(PORT_DRIVELEFTBACK, 0);
-  motor_move(PORT_DRIVERIGHTFRONT, 0);
-  motor_move(PORT_DRIVERIGHTMIDDLE, 0);
-  motor_move(PORT_DRIVERIGHTBACK, 0);
-  motor_move(PORT_ROLLERS, 0);
-  motor_move(PORT_FLYWHEEL, 0);
-}
 void opcontrol() {
-  //stopAllMotors();
-  //task_delete(displayInfoTask);
-
-  //task_delete(heading);
-
-  //task_delete(intakeIndex);
-
-  //task_delete(flywheelIndex);
+    stopAutonTasks(); 
 
     task_t driveTask = task_create(drive, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive Task");
     task_t rolTask = task_create(rollers, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Rol Task");
     task_t flyTask = task_create(flywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Fly Task");
-    task_t displayInfoTask = task_create(displayInfo, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Display Info Task");
     task_t shootTask = task_create(shooting, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooting Task");
 }

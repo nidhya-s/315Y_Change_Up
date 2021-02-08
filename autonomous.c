@@ -90,13 +90,9 @@ extern void cornerGoalOneRedFast(bool auton);
 
 extern void middleGoal2and6(bool auton, int timeout);
 
-task_t displayInfoTask;
-
-task_t heading;
-
-task_t intakeIndex;
-
-task_t flywheelIndex;
+task_t headingTask;
+task_t intakeIndexTask;
+task_t flywheelIndexTask;
 
 #define max(a, b) \
    ({ __typeof__ (a) _a = (a); \
@@ -164,8 +160,6 @@ void getHeading(){
       currentheading = imucur + 3600*wrap;
       delay(5);
   }
-
-      //return (heading + 1800) % 3600 - 1800;
 }
 
 void assignDriveMotorsDist(int leftSide, int rightSide, int power, bool clear, bool turn){
@@ -628,8 +622,97 @@ void remoteAutonRed(){
   forwardCoast(1000, 127, 2900);
   forwardCoast(700, 127, 3100);
   forwardCoast(400, 127, 3300);
-  forwardCoast(600, 100, 3500);
-  forwardCoast(600, 90, 3500);
+  forwardCoast(1200, 95, 3500);
+  //forwardCoast(600, 90, 3500);
+  delay(100);
+  run_intake = true;
+  backwardCoast(700, 127, 3600);
+  brake(20);
+  turnLeft(1800, 110);
+  forwardCoast(1900, 127, 1800);
+  //brake(-20);
+  autonFlywheel(127);
+  autonRollers(-127);
+  delay(800);
+  autonFlywheel(0);
+  /*turnLeft(900, 70);
+
+  backwardCoast(2100, 110, 900);
+  brake(-20);
+  autonRollers(0);*/
+
+    //align with second goal
+  /*turnRight(1800, 90);
+  forwardCoast(500, 100, 1800);
+
+  //brake(-20);
+  //shoot second goal
+  autonFlywheel(127);
+  delay(700);
+  autonFlywheel(0);
+  */
+  //Third Goal
+  //**********************************************************************************************************
+
+  backwardCoast(600, 127, 1800);
+  brake(-20);
+  turnRight(2700, 127);
+
+  forwardCoast(2800, 127, 2700);
+  brake(-20);
+
+  run_intake = false;
+
+    //align with third goal
+  turnLeft(2150, 127);
+  autonRollers(127);
+  forwardCoast(900, 127, 2150);
+
+  brake(-20);
+  //shoot third goal
+  autonFlywheel(127);
+  delay(1600);
+
+  backwardCoast(1400, 127, 2150);
+  autonFlywheel(0);
+  autonRollers(0);
+}
+
+void remoteAutonBlue(){
+  setFlywheel(0, true);
+  //First Goal
+  //**********************************************************************************************************
+  forwardCoast(1300, 127, 0);
+  brake(-20);
+
+  //align with first goal
+  turnRight(1275, 127);
+  forwardCoast(1100, 127, 1275);
+  autonFlywheel(127);
+  forwardCoast(300, 127, 1275);
+  brake(-20);
+  //shoot first goal
+  delay(400);
+  autonFlywheel(0);
+
+  //Second Goal
+  //**********************************************************************************************************
+  setFlywheel(2000, true);
+  autonRollers(127);
+
+  backwardCoast(1400, 127, 1275);
+  brake(-20);
+  turnLeft(2700, 127);
+  /*forwardCoast(1000, 127, 2900);
+  forwardCoast(800, 127, 3100);
+  forwardCoast(700, 100, 3300);
+  forwardCoast(600, 100, 3600);
+  forwardCoast(150, 90, 3600);*/
+  forwardCoast(1000, 127, 2900);
+  forwardCoast(700, 127, 3100);
+  forwardCoast(400, 127, 3300);
+  forwardCoast(1200, 95, 3500);
+  //forwardCoast(600, 90, 3500);
   delay(100);
   run_intake = true;
   backwardCoast(700, 127, 3600);
@@ -672,16 +755,16 @@ void remoteAutonRed(){
     //align with third goal
   turnLeft(2175, 127);
   autonRollers(127);
-  forwardCoast(800, 127, 2175);
+  forwardCoast(900, 127, 2175);
 
   brake(-20);
   //shoot third goal
   autonFlywheel(127);
-  delay(1800);
-  autonFlywheel(0);
-  autonRollers(0);
+  delay(1600);
 
   backwardCoast(1400, 127, 2175);
+  autonFlywheel(0);
+  autonRollers(0);
 }
 
 void progSkills(bool left){
@@ -1143,51 +1226,15 @@ void progSkills(bool left){
   backwardCoast(500, 80, 875);
 }
 
-void displayInfoAuton(void *param){
-   int i = 10;
-   lcd_initialize();
-   while (true)
-   {
-      char tempString1[100];
-      char tempString2[100];
-      char tempString3[100];
-      char tempString4[100];
-      char tempString5[100];
-      char tempString6[100];
-
-      //sprintf(tempString1, "Gyro Value: %d", (int)adi_gyro_get(gyro));
-      sprintf(tempString1, "Heading: %d", (int)(currentheading));
-      sprintf(tempString2, "IMU Set Value: %d", (int)(imu_get_heading(IMU_PORT)*10));
-
-      sprintf(tempString3, "Battery Voltage: %d", battery_get_voltage());
-    //  sprintf(tempString4, "GetHeading Value: %d", getHeading());
-      lcd_set_text(1, tempString1);
-      lcd_set_text(2, tempString2);
-      lcd_set_text(3, tempString3);
-      lcd_set_text(4, tempString4);
-      lcd_set_text(5, tempString5);
-      lcd_set_text(6, tempString6);
-
-      printf("here\n");
-      delay(10);
-   }
-}
-
-void preAuton(){
+void autonomous() {
   imu_sensor = 1;
+  //red = 2, blue = 3
   autonNumber = 2;
   bool left = true;
 
-  displayInfoTask = task_create(displayInfoAuton, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Display Info Task");
-  heading = task_create(getHeading, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Heading Task");
-  intakeIndex = task_create(runIntake, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake Task");
-  flywheelIndex = task_create(runFlywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Flywheel Task");
-
-
-}
-
-void autonomous() {
-  preAuton();
+  headingTask = task_create(getHeading, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Heading Task");
+  intakeIndexTask = task_create(runIntake, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake Task");
+  flywheelIndexTask = task_create(runFlywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Flywheel Task");
   switch (autonNumber)
    {
    case 1:
@@ -1197,6 +1244,7 @@ void autonomous() {
       remoteAutonRed();
       break;
    case 3:
+      remoteAutonBlue();
       break;
    case 4:
       break;

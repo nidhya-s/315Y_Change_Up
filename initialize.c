@@ -2,6 +2,18 @@
 #include "config.h"
 #include "pros/imu.h"
 
+extern task_t headingTask;
+extern task_t intakeIndexTask;
+extern task_t flywheelIndexTask;
+
+extern task_t driveTask;
+extern task_t rolTask;
+extern task_t flyTask;
+extern task_t shootTask;
+
+extern bool run_flywheel;
+extern bool run_intake;
+
 int autonNumber = 0;
 bool left = false;
 int32_t a;
@@ -11,9 +23,9 @@ adi_gyro_t gyro;
 
 #define NUMAUTONS 6
 
-static const char *btnm_map[] = {"ONECUBE", "SMALL-6", "SMALL-8", "\n",
+static const char *btnm_map[] = {"PROG", "RED", "BLUE", "\n",
                                  "EVAN", "PROG", "NONE", ""};
-static const char *auton_strings[] = {"ONECUBE", "SMALL-6", "SMALL-8", "EVAN", "PROG", "NONE", ""};
+static const char *auton_strings[] = {"PROG", "RED", "BLUE", "EVAN", "PROG", "NONE", ""};
 static const char *alliance_map[] = {"Red", "Blue", ""};
 
 static lv_res_t btnm_action(lv_obj_t *btnm, const char *txt)
@@ -67,14 +79,81 @@ void initializeDriveMotors(){
     motor_set_reversed(PORT_DRIVERIGHTMIDDLE, true);
 }
 
+void displayInfo(void *param){
+   lcd_initialize();
+   while (true)
+   {
+      char tempString1[100];
+      char tempString2[100];
+      char tempString3[100];
+
+      sprintf(tempString1, "IMU Value: %d", (int)imu_get_heading(IMU_PORT)*10);
+      sprintf(tempString2, "Line Sensor Value Top: %d", adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP));
+      sprintf(tempString3, "Line Sensor Value Bottom: %d", adi_analog_read_calibrated(LINE_TRACKER_BALL_BOTTOM));
+
+      lcd_set_text(1, tempString1);
+      lcd_set_text(2, tempString2);
+      lcd_set_text(3, tempString3);
+
+      delay(25);
+   }
+}
+
+void stopAllMotors()
+{
+  motor_move(PORT_DRIVELEFTFRONT, 0);
+  motor_move(PORT_DRIVELEFTMIDDLE, 0);
+  motor_move(PORT_DRIVELEFTBACK, 0);
+  motor_move(PORT_DRIVERIGHTFRONT, 0);
+  motor_move(PORT_DRIVERIGHTMIDDLE, 0);
+  motor_move(PORT_DRIVERIGHTBACK, 0);
+  motor_move(PORT_ROLLERS, 0);
+  motor_move(PORT_FLYWHEEL, 0);
+}
+
+
+void stopAutonTasks(){
+  run_flywheel = false;;
+  run_intake = false;
+  //task_delete(headingTask);
+  //task_delete(intakeIndexTask);
+  //task_delete(flywheelIndexTask);
+  stopAllMotors();
+}
+
+void stopDriverTasks(){
+ // task_delete(driveTask);
+ // task_delete(rolTask);
+ // task_delete(flyTask);
+ // task_delete(shootTask);
+ // stopAllMotors();
+}
+
+void disabled(){
+  run_flywheel = false;;
+  run_intake = false;
+//  stopAutonTasks();
+//  stopDriverTasks();
+//  delay(100);
+}
+
+
+void  reset_imu() {
+   imu_reset(IMU_PORT);
+   int time = millis();
+   int iter = 0;
+   while (imu_get_status(IMU_PORT) == EAGAIN) {
+    iter += 10;
+    delay(10);
+   }
+}
+
+
 void initialize(){
     motor_set_reversed(PORT_DRIVERIGHTFRONT, true);
     motor_set_reversed(PORT_DRIVERIGHTBACK, true);
     motor_set_reversed(PORT_DRIVERIGHTMIDDLE, true);
-    /*motor_set_reversed(PORT_DRIVELEFTBACK, true);
-    motor_set_reversed(PORT_DRIVELEFTFRONT, true);
-    motor_set_reversed(PORT_DRIVELEFTMIDDLE, true);*/
-   imu_reset(IMU_PORT);
+    reset_imu();
 
    //these lines go in initialize() in initialize
       adi_port_set_config(LINE_TRACKER_LEFT,ADI_ANALOG_IN);
@@ -87,8 +166,10 @@ void initialize(){
       adi_analog_calibrate(LINE_TRACKER_RIGHT);
       adi_analog_calibrate(LINE_TRACKER_BALL_TOP);
       adi_analog_calibrate(LINE_TRACKER_BALL_BOTTOM);
-}
 
+      task_t displayTask = task_create(displayInfo, "PROS", TASK_PRIORITY_DEFAULT,
+                                       TASK_STACK_DEPTH_DEFAULT, "Display Info Task");
+}
 
 
 void competition_initialize()
@@ -110,12 +191,4 @@ void competition_initialize()
    lv_btnm_set_action(allianceM, btnm_action_color);
    lv_obj_set_size(allianceM, LV_HOR_RES - 40, 50);
    lv_obj_align(allianceM, btnm, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
-
-   imu_reset(IMU_PORT);
-   int time = millis();
-   int iter = 0;
-   while (imu_get_status(IMU_PORT) == EAGAIN) {
-    iter += 10;
-    delay(10);
-  }
 }
