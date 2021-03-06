@@ -27,6 +27,7 @@ int flywheelDirection = 0;
 extern adi_gyro_t gyro;
 
 extern void stopAutonTasks();
+//extern void displayInfo(void *param);
 
 task_t driveTask;
 task_t rolTask;
@@ -545,6 +546,11 @@ void flywheel(void* param){
     bool pressed = false;
     while(true)
     {
+      if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_Y)|| controller_get_digital(CONTROLLER_PARTNER, DIGITAL_Y)){
+        motor_move(PORT_FLYWHEEL, 80);
+        delay(3000);
+        motor_move(PORT_FLYWHEEL, 0);
+      }
       if(controller_get_digital(CONTROLLER_MASTER, DIGITAL_X) || controller_get_digital(CONTROLLER_PARTNER, DIGITAL_X)){
         while(adi_analog_read_calibrated(LINE_TRACKER_BALL_TOP) > TOPSENSOR)
         {
@@ -592,12 +598,21 @@ void flywheel(void* param){
     }
 }
 
+bool opControl_started=false;
 
 void opcontrol() {
-    stopAutonTasks(); 
+    stopAutonTasks();
 
-    task_t driveTask = task_create(drive, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive Task");
-    task_t rolTask = task_create(rollers, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Rol Task");
-    task_t flyTask = task_create(flywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Fly Task");
-    task_t shootTask = task_create(shooting, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooting Task");
+    //task_t displayTask = task_create(displayInfo, "PROS", TASK_PRIORITY_DEFAULT,
+    //                                 TASK_STACK_DEPTH_DEFAULT, "Display Info Task");
+    if(!opControl_started)
+    {
+      task_t driveTask = task_create(drive, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Drive Task");
+      task_t rolTask = task_create(rollers, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Rol Task");
+      task_t flyTask = task_create(flywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Fly Task");
+      task_t shootTask = task_create(shooting, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Shooting Task");
+      opControl_started  = true;
+    }
+
+
 }

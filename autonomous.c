@@ -589,7 +589,7 @@ void setRollers(int timeout, bool wait){
   intakeTimeout = timeout;
 }
 
-void remoteAutonRed(){
+void remoteAuton(){
   setFlywheel(0, true);
   //First Goal
   //**********************************************************************************************************
@@ -598,9 +598,9 @@ void remoteAutonRed(){
 
   //align with first goal
   turnRight(1275, 127);
-  forwardCoast(1100, 127, 1275);
+  forwardCoast(1100, 127, 1300);
   autonFlywheel(127);
-  forwardCoast(300, 127, 1275);
+  forwardCoast(300, 127, 1300);
   brake(-20);
   //shoot first goal
   delay(400);
@@ -611,7 +611,7 @@ void remoteAutonRed(){
   setFlywheel(2000, true);
   autonRollers(127);
 
-  backwardCoast(1400, 127, 1275);
+  backwardCoast(1400, 127, 1300);
   brake(-20);
   turnLeft(2700, 127);
   /*forwardCoast(1000, 127, 2900);
@@ -629,12 +629,14 @@ void remoteAutonRed(){
   backwardCoast(700, 127, 3600);
   brake(20);
   turnLeft(1800, 110);
-  forwardCoast(1900, 127, 1800);
+  forwardCoast(2100, 127, 1800);
   //brake(-20);
+  assignDriveMotorsAuton(20);
   autonFlywheel(127);
   autonRollers(-127);
-  delay(800);
+  delay(1000);
   autonFlywheel(0);
+  assignDriveMotorsAuton(0);
   /*turnLeft(900, 70);
 
   backwardCoast(2100, 110, 900);
@@ -654,26 +656,26 @@ void remoteAutonRed(){
   //Third Goal
   //**********************************************************************************************************
 
-  backwardCoast(600, 127, 1800);
+  backwardCoast(700, 127, 1800);
   brake(-20);
   turnRight(2700, 127);
-
-  forwardCoast(2800, 127, 2700);
+  autonRollers(127);
+  forwardCoast(2500, 127, 2700);
   brake(-20);
 
   run_intake = false;
 
     //align with third goal
-  turnLeft(2150, 127);
+  turnLeft(2225, 127);
   autonRollers(127);
-  forwardCoast(900, 127, 2150);
+  forwardCoast(1050, 127, 2225);
 
   brake(-20);
   //shoot third goal
   autonFlywheel(127);
-  delay(1600);
+  delay(2000);
 
-  backwardCoast(1400, 127, 2150);
+  backwardCoast(1400, 127, 2225);
   autonFlywheel(0);
   autonRollers(0);
 }
@@ -687,9 +689,9 @@ void remoteAutonBlue(){
 
   //align with first goal
   turnRight(1275, 127);
-  forwardCoast(1100, 127, 1275);
+  forwardCoast(1100, 127, 1300);
   autonFlywheel(127);
-  forwardCoast(300, 127, 1275);
+  forwardCoast(300, 127, 1300);
   brake(-20);
   //shoot first goal
   delay(400);
@@ -700,7 +702,7 @@ void remoteAutonBlue(){
   setFlywheel(2000, true);
   autonRollers(127);
 
-  backwardCoast(1400, 127, 1275);
+  backwardCoast(1400, 127, 1300);
   brake(-20);
   turnLeft(2700, 127);
   /*forwardCoast(1000, 127, 2900);
@@ -718,12 +720,15 @@ void remoteAutonBlue(){
   backwardCoast(700, 127, 3600);
   brake(20);
   turnLeft(1800, 110);
-  forwardCoast(1900, 127, 1800);
+  forwardCoast(2100, 127, 1800);
   //brake(-20);
+  assignDriveMotorsAuton(20);
   autonFlywheel(127);
   autonRollers(-127);
-  delay(800);
+  delay(900);
   autonFlywheel(0);
+  assignDriveMotorsAuton(0);
+
   /*turnLeft(900, 70);
 
   backwardCoast(2100, 110, 900);
@@ -743,27 +748,285 @@ void remoteAutonBlue(){
   //Third Goal
   //**********************************************************************************************************
 
-  backwardCoast(600, 127, 1800);
+  backwardCoast(800, 127, 1800);
   brake(-20);
   turnRight(2700, 127);
-
-  forwardCoast(2800, 127, 2700);
+  autonRollers(127);
+  forwardCoast(2600, 127, 2700);
   brake(-20);
 
   run_intake = false;
 
     //align with third goal
-  turnLeft(2175, 127);
+  turnLeft(2200, 127);
   autonRollers(127);
-  forwardCoast(900, 127, 2175);
+  forwardCoast(900, 127, 2200);
 
   brake(-20);
   //shoot third goal
   autonFlywheel(127);
   delay(1600);
 
-  backwardCoast(1400, 127, 2175);
+  backwardCoast(1400, 127, 2200);
   autonFlywheel(0);
+  autonRollers(0);
+}
+
+void sixBallAuton(){
+  setFlywheel(0, true);
+  //First Goal
+  //**********************************************************************************************************
+  forwardCoast(1200, 127, 0);
+  brake(-20);
+
+  //align with first goal
+  turnLeft(-1275, 127);
+  forwardCoast(1100, 127, -1300);
+  autonFlywheel(127);
+  autonRollers(-127);
+  forwardCoast(400, 127, -1300);
+  //shoot first goal
+  delay(400);
+  autonFlywheel(0);
+  //autonRollers(-127);
+  backwardCoast(1700, 127, -1300);
+  turnLeft(0, 127);
+  autonRollers(127);
+  run_flywheel = true;
+  forwardCoast(1200, 127, 0);
+  forwardCoast(500, 80, 0);
+  brake(-20);
+  backwardCoast(1300, 127, 0);
+
+  forwardCoast(1100, 127, 900);
+  forwardCoast(800, 127, 700);
+  autonRollers(0);
+  forwardCoast(700, 127, 500);
+
+  forwardCoast(700, 100, 300);
+  forwardCoast(100, 90, 100);
+  brake(-10);
+  //autonFlywheel(127);
+  delay(50);
+  autonRollers(0);
+
+  backwardCoast(100, 127, 100);
+  backwardCoast(100, 127, 500);
+  backwardCoast(300, 127, 700);
+  backwardCoast(2100, 127, 900);
+  autonRollers(127);
+  turnLeft(575, 127);
+  run_intake = true;
+  forwardCoast(925, 80, 575);
+  brake(-5);
+  delay(600);
+  backwardCoast(1300, 127, 575);
+  forwardCoast(400, 127, 650);
+  forwardCoast(400, 127, 800);
+  forwardCoast(400, 127, 900);
+
+  forwardCoast(500, 127, 1100);
+  forwardCoast(500, 127, 1300);
+  forwardCoast(500, 127, 1500);
+  forwardCoast(500, 127, 1700);
+  forwardCoast(1000, 127, 1800);
+  brake(-5);
+  autonFlywheel(127);
+
+
+  /*turnRight(525, 127);
+  forwardCoast(600, 127, 525);
+  forwardCoast(150, 127, 700);
+
+  //Second Goal
+  //**********************************************************************************************************
+  /*setFlywheel(2000, true);
+  autonRollers(127);
+
+  backwardCoast(1400, 127, 1300);
+  brake(-20);
+  turnLeft(2700, 127);
+  forwardCoast(1000, 127, 2900);
+  forwardCoast(800, 127, 3100);
+  forwardCoast(700, 100, 3300);
+  forwardCoast(600, 100, 3600);
+  //forwardCoast(150, 90, 3600);
+  forwardCoast(1000, 127, 2900);
+  forwardCoast(700, 127, 3100);
+  forwardCoast(400, 127, 3300);
+  forwardCoast(1200, 95, 3500);
+  //forwardCoast(600, 90, 3500);
+  delay(100);
+  run_intake = true;
+  */
+  /*backwardCoast(700, 127, 0);
+  brake(20);
+  turnLeft(-1600, 110);
+  forwardCoast(1700, 127, -1800);
+  //brake(-20);
+  autonFlywheel(127);
+  autonRollers(-127);
+  delay(500);
+  autonFlywheel(0);
+  //Third Goal
+  //**********************************************************************************************************
+
+  backwardCoast(700, 127, -1800);
+  brake(-20);
+  turnRight(-2700, 127);
+  autonRollers(127);
+  forwardCoast(2100, 127, -2700);
+  brake(-20);
+
+  run_intake = false;
+
+    //align with third goal
+  turnLeft(-2225, 127);
+  forwardCoast(1200, 127, -2225);
+  autonRollers(-127);
+  delay(500);
+  autonRollers(0);*/
+}
+
+void fiveBallAutonRed(){
+  setFlywheel(0, true);
+  //First Goal
+  //**********************************************************************************************************
+  forwardCoast(1000, 127, 0);
+  brake(-20);
+
+  //align with first goal
+  turnLeft(-1275, 127);
+  forwardCoast(1100, 127, -1275);
+  autonFlywheel(127);
+  autonRollers(-127);
+  forwardCoast(400, 100, -1275);
+  //shoot first goal
+  delay(400);
+  autonFlywheel(0);
+  //autonRollers(-127);
+  //pick up middle line ball
+  backwardCoast(1450, 127, -1275);
+  turnLeft(0, 127);
+  autonRollers(127);
+  run_flywheel = true;
+  forwardCoast(1200, 127, 0);
+  forwardCoast(925, 80, 0);
+  brake(-20);
+  backwardCoast(1450, 127, 0);
+
+  //hit ball into middle goal
+  forwardCoast(1100, 127, 900);
+  forwardCoast(750, 127, 650);
+  autonRollers(0);
+  forwardCoast(700, 127, 500);
+
+  forwardCoast(700, 100, 300);
+  forwardCoast(500, 90, 100);
+  brake(-10);
+  //autonFlywheel(127);
+  delay(50);
+  autonRollers(0);
+
+
+  backwardCoast(1100, 127, 0);
+  brake(20);
+  turnLeft(-1600, 110);
+  forwardCoast(1000, 127, -1650);
+  forwardCoast(700, 80, -1700);
+  //brake(-20);
+  autonFlywheel(127);
+  autonRollers(-127);
+  delay(500);
+  autonFlywheel(0);
+  //Third Goal
+  //**********************************************************************************************************
+
+  backwardCoast(700, 127, -1800);
+  brake(-20);
+  turnRight(-2700, 127);
+  autonRollers(127);
+  forwardCoast(2300, 127, -2700);
+  brake(-20);
+
+  run_intake = false;
+
+    //align with third goal
+  turnLeft(-2225, 127);
+  forwardCoast(1200, 127, -2225);
+  autonRollers(-127);
+  delay(500);
+  autonRollers(0);
+}
+
+void fiveBallAutonBlue(){
+  setFlywheel(0, true);
+  //First Goal
+  //**********************************************************************************************************
+  forwardCoast(1100, 127, 0);
+  brake(-20);
+
+  //align with first goal
+  turnLeft(-1275, 127);
+  forwardCoast(1100, 127, -1275);
+  autonFlywheel(127);
+  autonRollers(-127);
+  forwardCoast(400, 100, -1275);
+  //shoot first goal
+  delay(400);
+  autonFlywheel(0);
+  //autonRollers(-127);
+  //pick up middle line ball
+  backwardCoast(1545, 127, -1275);
+  turnLeft(0, 127);
+  autonRollers(127);
+  run_flywheel = true;
+  forwardCoast(1200, 127, 0);
+  forwardCoast(600, 80, 0);
+  brake(-20);
+  backwardCoast(1300, 127, 0);
+
+  //hit ball into middle goal
+  forwardCoast(1100, 127, 900);
+  forwardCoast(800, 127, 675);
+  autonRollers(0);
+  forwardCoast(700, 127, 500);
+
+  forwardCoast(700, 100, 300);
+  forwardCoast(200, 90, 100);
+  brake(-10);
+  //autonFlywheel(127);
+  delay(50);
+  autonRollers(0);
+
+
+  backwardCoast(800, 127, 0);
+  brake(20);
+  turnLeft(-1600, 110);
+  forwardCoast(1000, 127, -1700);
+  forwardCoast(700, 127, -1700);
+  //brake(-20);
+  autonFlywheel(127);
+  autonRollers(-127);
+  delay(500);
+  autonFlywheel(0);
+  //Third Goal
+  //**********************************************************************************************************
+
+  backwardCoast(700, 127, -1800);
+  brake(-20);
+  turnRight(-2700, 127);
+  autonRollers(127);
+  forwardCoast(2100, 127, -2700);
+  brake(-20);
+
+  run_intake = false;
+
+    //align with third goal
+  turnLeft(-2225, 127);
+  forwardCoast(1200, 127, -2225);
+  autonRollers(-127);
+  delay(500);
   autonRollers(0);
 }
 
@@ -1226,25 +1489,320 @@ void progSkills(bool left){
   backwardCoast(500, 80, 875);
 }
 
+void progSkillsFast(bool left){
+  setFlywheel(0, true);
+  //First Goal
+  //**********************************************************************************************************
+  //pick up first ball
+  setRollers(0, true);
+              //1250
+  forwardCoast(1100, 127, 0);
+
+  //forwardCoast(1400, 127, -1295);
+  forwardCoast(2500, 127, -1295);
+  //delay(200);
+  //shoot first goal
+  autonFlywheel(127);
+  autonRollers(127);
+  //assignDriveMotorsAuton(40);
+  cornerGoalFast(true, CORNERGOALTIMEOUT);
+  //assignDriveMotorsAuton(0);
+
+
+  //Second Goal
+  //**********************************************************************************************************
+  //spit out one ball
+  setFlywheel(0, false);
+  backwardCoast(100, 127, -1295);
+  autonRollers(-127);
+  backwardCoast(200, 127, -1275);
+  //autonRollers(0);
+  //delay(20);
+  autonRollers(-127);
+  backwardCoast(600, 127, -1275);
+
+  backwardCoast(600, 127, -1275);
+  autonRollers(0);
+  delay(200);
+  autonRollers(127);
+
+  if(left){
+    turnRight(-900, 127);
+  }
+  else{
+    turnLeft(-900, 127);
+  }
+
+  forwardCoast(1500, 105, -900);
+  setRollers(0, false);
+  delay(300);
+  run_flywheel = false;
+
+  backwardCoast(400, 127, -900);
+  brake(20);
+
+  //pick up other ball
+  if(left){
+    turnLeft(780, 127);
+  }
+  else{
+    turnRight(780, 127);
+  }
+  //eject ball
+  autonFlywheel(-127);
+  forwardCoast(1500, 127, 780);
+  autonFlywheel(0);
+
+  autonRollers(127);
+  setFlywheel(0, true);
+  forwardCoast(1000, 127, 780);
+  setFlywheel(0, true);
+  forwardCoast(1100, 120, 780);
+  setRollers(0, false);
+  brake(-30);
+
+  //shoot second goal
+  if(left){
+    turnRight(1800, 127);
+  }
+  else{
+    turnLeft(1800, 127);
+  }
+  //setRollers(0, false);
+  forwardCoast(1800, 115, 1800);
+
+  middleGoal2and6(true, MIDDLEGOALTIMEOUT);
+
+  //Third Goal
+  //**********************************************************************************************************
+  //Spit out blue ball
+  backwardCoast(450, 127, 1800);
+  brake(20);
+  autonRollers(127);
+  if(left){
+    turnLeft(900, 110);
+  }
+  else{
+    turnLeft(900, 110);
+  }
+
+  //ejecting ball
+  autonFlywheel(-127);
+
+  //pick up corner ball
+  forwardCoast(700, 127, 900);
+  forwardCoast(1200, 115, 900);
+  //stop ejection
+  autonFlywheel(0);
+  forwardCoast(900, 80, 900);
+
+  brake(-20);
+  delay(50);
+
+  setFlywheel(0, true);
+
+  forwardCoast(500, 100, 650);
+
+  forwardCoast(800, 100, 650);
+  delay(50);
+  setRollers(0, false);
+  backwardCoast(200, 110, 650);
+  backwardCoast(200, 110, 800);
+  backwardCoast(300, 110, 950);
+  backwardCoast(300, 110, 1100);
+  backwardCoast(200, 110, 1250);
+  backwardCoast(200, 110, 1250);
+  brake(20);
+  forwardCoast(1350, 110, 1250);
+  autonRollers(0);
+  cornerGoalFast(true, CORNERGOALTIMEOUT);
+
+  //Fourth Goal
+  //**********************************************************************************************************
+  //go to next ball next to middle goal
+  setFlywheel(0, false);
+  backwardCoast(100, 127, 1300);
+  autonRollers(127);
+  //run_intake = true;
+  backwardCoast(400, 127, 1300);
+  autonRollers(0);
+  backwardCoast(700, 127, 1300);
+  brake(20);
+  autonFlywheel(-127);
+  if(left)
+  {
+    turnLeft(-180, 127);
+  }
+  else
+  {
+    turnRight(-180, 127);
+  }
+
+
+  //ejecting
+  run_flywheel = false;
+  autonFlywheel(-127);
+  autonRollers(127);
+  forwardCoast(1000, 127, -180);
+  autonFlywheel(-127);
+  autonRollers(127);
+  forwardCoast(1000, 120, -180);
+  forwardCoast(1200, 110, -180);
+  brake(-20);
+
+
+  //turn to shoot 4th goal
+  if(left)
+  {
+    turnLeft(900, 127);
+  }
+  else
+  {
+    turnRight(900, 127);
+  }
+  autonFlywheel(0);
+  run_flywheel = true;
+  setRollers(0, false);
+  forwardCoast(600, 120, 900);
+  run_flywheel = false;
+  forwardCoast(1200, 120, 900);
+
+  delay(350);
+  autonRollers(0);
+  assignDriveMotorsAuton(20);
+  middleGoal2and6(true, MIDDLEGOALTIMEOUT);
+  assignDriveMotorsAuton(0);
+  delay(20);
+
+  //Fifth Goal
+  //**********************************************************************************************************
+  autonRollers(-127);
+  backwardCoast(500, 127, 900);
+  autonRollers(127);
+  backwardCoast(700, 127, 900);
+  brake(10);
+
+  autonRollers(127);
+  //ejecting blue ball
+  autonFlywheel(-127);
+  if(left)
+  {
+    turnLeft(0, 127);
+  }
+  else
+  {
+    turnRight(0, 127);
+  }
+  forwardCoast(2300, 127, 0);
+  forwardCoast(450, 120, 0);
+  delay(200);
+  setFlywheel(0, false);
+  backwardCoast(1100, 127, 0);
+  brake(20);
+
+  //turn towards goal
+  if(left)
+  {
+    turnLeft(475, 127);
+  }
+  else
+  {
+    turnRight(475, 127);
+  }
+
+  forwardCoast(1800, 110, 475);
+  autonRollers(0);
+  delay(175);
+  run_flywheel = false;
+  assignDriveMotorsAuton(10);
+  cornerGoalOneRedFast(true);
+  assignDriveMotorsAuton(0);
+  delay(20);
+
+  //Sixth Goal
+  //**********************************************************************************************************
+  int headingChange = 1800;
+
+  //spit out one ball
+  setFlywheel(0, false);
+  autonRollers(-127);
+  backwardCoast(200, 127, -1325 + headingChange);
+  //autonRollers(0);
+  //delay(20);
+  autonRollers(-127);
+  backwardCoast(1000, 127, -1325 + headingChange);
+  delay(20);
+  delay(200);
+  autonRollers(0);
+
+
+  if(left){
+    turnRight(-900 + headingChange, 110);
+  }
+  else{
+    turnLeft(-900 + headingChange, 110);
+  }
+  autonRollers(127);
+  setRollers(0, false);
+
+  forwardCoast(1700, 105, 900);
+  delay(175);
+  run_flywheel = false;
+
+  //turn to pick up ball
+  backwardCoast(400, 110, 900);
+  brake(20);
+  //pick up other ball
+  if(left){
+    turnLeft(750 + headingChange, 127);
+  }else{
+    turnRight(750 + headingChange, 127);
+  }
+  //eject ball
+  autonFlywheel(-127);
+  forwardCoast(1500, 127, 750 + headingChange);
+  autonFlywheel(0);
+
+  autonRollers(127);
+  setFlywheel(0, true);
+  forwardCoast(1000, 127, 750 + headingChange);
+  setFlywheel(0, true);
+  forwardCoast(1100, 127, 750 + headingChange);
+  setRollers(0, false);
+  brake(-20);
+
+  //shoot second goal
+  if(left){
+    turnRight(1800 + headingChange, 127);
+  }
+  else{
+    turnLeft(1800 + headingChange, 127);
+  }
+  //run_flywheel = true;
+  forwardCoast(1800, 127, 1800 + headingChange);
+  assignDriveMotorsAuton(10);
+  middleGoal2and6(true, MIDDLEGOALTIMEOUT);
+  assignDriveMotorsAuton(0);
+}
+
 void autonomous() {
   imu_sensor = 1;
-  //red = 2, blue = 3
-  autonNumber = 2;
   bool left = true;
 
+  autonNumber = 2;
   headingTask = task_create(getHeading, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Heading Task");
   intakeIndexTask = task_create(runIntake, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Intake Task");
   flywheelIndexTask = task_create(runFlywheel, "PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Flywheel Task");
   switch (autonNumber)
    {
    case 1:
-      progSkills(left);
+      progSkillsFast(left);
       break;
    case 2:
-      remoteAutonRed();
+      fiveBallAutonRed();
       break;
    case 3:
-      remoteAutonBlue();
+      fiveBallAutonBlue();
       break;
    case 4:
       break;

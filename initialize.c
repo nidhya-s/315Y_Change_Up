@@ -14,23 +14,20 @@ extern task_t shootTask;
 extern bool run_flywheel;
 extern bool run_intake;
 
-int autonNumber = 0;
+int autonNumber = 3;
 bool left = false;
 int32_t a;
 adi_gyro_t gyro;
 
 
 
-#define NUMAUTONS 6
+#define NUMAUTONS 3
 
-static const char *btnm_map[] = {"PROG", "RED", "BLUE", "\n",
-                                 "EVAN", "PROG", "NONE", ""};
-static const char *auton_strings[] = {"PROG", "RED", "BLUE", "EVAN", "PROG", "NONE", ""};
-static const char *alliance_map[] = {"Red", "Blue", ""};
+static const char *btnm_map[] = {"PROG", "RED", "BLUE", ""};
+static const char *auton_strings[] = {"PROG", "RED", "BLUE", ""};
 
 static lv_res_t btnm_action(lv_obj_t *btnm, const char *txt)
 {
-   autonNumber = 0;
    for (int i = 0; i < sizeof(auton_strings) / sizeof(auton_strings[0]); i++)
    {
       printf("%s\n", auton_strings[i]);
@@ -79,7 +76,7 @@ void initializeDriveMotors(){
     motor_set_reversed(PORT_DRIVERIGHTMIDDLE, true);
 }
 
-void displayInfo(void *param){
+/*void displayInfo(void *param){
    lcd_initialize();
    while (true)
    {
@@ -97,7 +94,7 @@ void displayInfo(void *param){
 
       delay(25);
    }
-}
+}*/
 
 void stopAllMotors()
 {
@@ -155,6 +152,7 @@ void initialize(){
     motor_set_reversed(PORT_DRIVERIGHTMIDDLE, true);
     reset_imu();
 
+    //lcd_initialize();
    //these lines go in initialize() in initialize
       adi_port_set_config(LINE_TRACKER_LEFT,ADI_ANALOG_IN);
       adi_port_set_config(LINE_TRACKER_MIDDLE,ADI_ANALOG_IN);
@@ -167,8 +165,6 @@ void initialize(){
       adi_analog_calibrate(LINE_TRACKER_BALL_TOP);
       adi_analog_calibrate(LINE_TRACKER_BALL_BOTTOM);
 
-      task_t displayTask = task_create(displayInfo, "PROS", TASK_PRIORITY_DEFAULT,
-                                       TASK_STACK_DEPTH_DEFAULT, "Display Info Task");
 }
 
 
@@ -186,9 +182,9 @@ void competition_initialize()
    lv_obj_set_size(btnm, LV_HOR_RES - 40, LV_VER_RES / 3);
    lv_obj_align(btnm, title, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
 
-   lv_obj_t *allianceM = lv_btnm_create(lv_scr_act(), NULL);
+   /*lv_obj_t *allianceM = lv_btnm_create(lv_scr_act(), NULL);
    lv_btnm_set_map(allianceM, alliance_map);
    lv_btnm_set_action(allianceM, btnm_action_color);
    lv_obj_set_size(allianceM, LV_HOR_RES - 40, 50);
-   lv_obj_align(allianceM, btnm, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
+   lv_obj_align(allianceM, btnm, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);*/
 }
